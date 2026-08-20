@@ -22,7 +22,7 @@ TIMEOUT_MS ?= 10000
 
 .PHONY: all emulate emulate-open emulate-closed disassembly-closed clean
 
-all: $(BUILD_DIR)/ $(NVSS_OPEN_BIN)
+all: $(BUILD_DIR)/ $(NVSS_OPEN_BIN) $(NVSS_OPEN_ASM) $(NVSS_OPEN_ELF)
 
 $(BUILD_DIR)/:
 	mkdir -p $@

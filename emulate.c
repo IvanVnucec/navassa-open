@@ -2,12 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <unicorn/unicorn.h>
 
 #define DEFAULT_TIMEOUT_MS  10000
 
 #define RAM_BASE            0x20000000
-#define RAM_SIZE            0x100000
+#define RAM_SIZE            0x200000
+#define MMIO_BASE           0x40000000
+#define MMIO_SIZE           0x20000000
+#define SCB_BASE            0xe0000000
+#define SCB_SIZE            0x00100000
+#define RAM_FW_BASE         0x20036e24
+#define RAM_FW_OFFSET       0x36e24
 #define PAGE_SIZE           0x1000
 
 static size_t align_page(size_t size)
@@ -18,6 +25,12 @@ static size_t align_page(size_t size)
 static void hook_code(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
 {
     printf("PC = 0x%08lx\n", address);
+}
+
+static bool hook_mem_write(uc_engine *uc, uc_mem_type type, uint64_t address, int size, int64_t value, void *user_data)
+{
+    printf("  WRITE 0x%08lx = 0x%0*lx (%d bytes)\n", address, size * 2, value, size);
+    return true;
 }
 
 int main(int argc, char **argv)
@@ -49,7 +62,7 @@ int main(int argc, char **argv)
     fclose(f);
 
     uc_engine *uc;
-    uc_err err = uc_open(UC_ARCH_ARM, UC_MODE_THUMB, &uc);
+    uc_err err = uc_open(UC_ARCH_ARM, UC_MODE_THUMB | UC_MODE_MCLASS, &uc);
     if (err) {
         printf("Failed to open unicorn: %s\n", uc_strerror(err));
         return 1;
@@ -59,10 +72,19 @@ int main(int argc, char **argv)
     size_t fw_map_size = align_page(fsize);
     uc_mem_map(uc, firmware_base, fw_map_size, UC_PROT_ALL);
     uc_mem_map(uc, RAM_BASE, RAM_SIZE, UC_PROT_ALL);
+    uc_mem_map(uc, MMIO_BASE, MMIO_SIZE, UC_PROT_READ | UC_PROT_WRITE);
+    uc_mem_map(uc, SCB_BASE, SCB_SIZE, UC_PROT_READ | UC_PROT_WRITE);
     uc_mem_write(uc, firmware_base, code, fsize);
 
-    uc_hook hh_code;
+    long ram_fw_size = fsize - RAM_FW_OFFSET;
+    if (ram_fw_size > 0) {
+        uc_mem_write(uc, RAM_FW_BASE, code + RAM_FW_OFFSET, ram_fw_size);
+        printf("Pre-loaded %ld bytes at 0x%08x (flash offset 0x%x)\n", ram_fw_size, (uint32_t)RAM_FW_BASE, RAM_FW_OFFSET);
+    }
+
+    uc_hook hh_code, hh_write;
     uc_hook_add(uc, &hh_code, UC_HOOK_CODE, hook_code, NULL, 1, 0);
+    uc_hook_add(uc, &hh_write, UC_HOOK_MEM_WRITE, hook_mem_write, NULL, 1, 0);
 
     uint32_t sp, reset_vec;
     memcpy(&sp, code + 0, 4);

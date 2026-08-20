@@ -1,11 +1,10 @@
 BUILD_DIR = build
-SRC_DIR   = src
 
 NVSS_BASE_ADDR  = 0x01000000
 
-NVSS_OPEN_STARTUP = $(SRC_DIR)/navassa_open_startup.s
-NVSS_OPEN_C       = $(SRC_DIR)/navassa_open.c
-NVSS_OPEN_LD      = $(SRC_DIR)/navassa_open.ld
+NVSS_OPEN_STARTUP = src/navassa_open_startup.s
+NVSS_OPEN_C       = src/navassa_open.c
+NVSS_OPEN_LD      = src/navassa_open.ld
 NVSS_OPEN_ELF     = $(BUILD_DIR)/navassa_open.elf
 NVSS_OPEN_BIN     = $(BUILD_DIR)/navassa_open.bin
 NVSS_OPEN_ASM     = $(BUILD_DIR)/navassa_open.asm
@@ -16,8 +15,8 @@ NVSS_CLOSED_BIN  = $(BUILD_DIR)/Navassa_EvaluationFw.bin
 NVSS_CLOSED_ASM  = $(BUILD_DIR)/Navassa_EvaluationFw.asm
 NVSS_CLOSED_ELF  = $(BUILD_DIR)/Navassa_EvaluationFw.elf
 
-EMULATE_C   = emulate.c
-EMULATE_BIN = $(BUILD_DIR)/emulate
+EMULATOR_C   = emulator/emulator.c
+EMULATOR_BIN = $(BUILD_DIR)/emulator
 TIMEOUT_MS ?= 10000
 
 .PHONY: all emulate emulate-open emulate-closed disassembly-closed clean
@@ -55,14 +54,14 @@ $(NVSS_CLOSED_ELF): $(NVSS_CLOSED_BIN)
 
 disassembly-closed: $(BUILD_DIR)/ $(NVSS_CLOSED_BIN) $(NVSS_CLOSED_ASM) $(NVSS_CLOSED_ELF)
 
-$(EMULATE_BIN): $(EMULATE_C) | $(BUILD_DIR)/
+$(EMULATOR_BIN): $(EMULATOR_C) | $(BUILD_DIR)/
 	gcc -o $@ $< -lunicorn -lpthread
 
-emulate-open: $(EMULATE_BIN) $(NVSS_OPEN_BIN)
-	./$(EMULATE_BIN) $(NVSS_OPEN_BIN) $(NVSS_BASE_ADDR) $(TIMEOUT_MS)
+emulate-open: $(EMULATOR_BIN) $(NVSS_OPEN_BIN)
+	./$(EMULATOR_BIN) $(NVSS_OPEN_BIN) $(NVSS_BASE_ADDR) $(TIMEOUT_MS)
 
-emulate-closed: $(EMULATE_BIN) $(NVSS_CLOSED_BIN)
-	./$(EMULATE_BIN) $(NVSS_CLOSED_BIN) $(NVSS_BASE_ADDR) $(TIMEOUT_MS)
+emulate-closed: $(EMULATOR_BIN) $(NVSS_CLOSED_BIN)
+	./$(EMULATOR_BIN) $(NVSS_CLOSED_BIN) $(NVSS_BASE_ADDR) $(TIMEOUT_MS)
 
 emulate: emulate-open
 

@@ -407,3 +407,16 @@ IRQ pin -> stream_int_handler (ack RMW @0x41000b0a)
         -> dispatcher 0x1031e9e (validate/install-callback/clear-counters)
         -> action executor 0x101d464 (per-channel pin_update sequences)
         -> pin_update 0x1002db4 (VERIFIED in C) -> registers
+
+## Round 14 findings
+
+- dispatcher callers complete: 4 total = 2 stream int handlers + 0x1028ba8
+  (stream_ctrl_event_dispatch: per-bit config of [event+0x14] bits 2/3 ->
+  0x101cf98(0/1) + channel mgr reads) + 0x103496e
+- 0x103496e = DWT-timed operation: enables DEMCR |= 0x1000000 (TRACENA),
+  DWT->CTRL |= 1 (CYCCNTENA @0xe0001000), reads driver ctx [0x20000404+0x77f]
+  -> the calibration timing infrastructure (cal_task_core.c/tracking_cals.c)
+- 0x101d464 named: event_action_executor
+- event objects are PRE-ALLOCATED inside the dispatch table entries
+  (handlers pass table[i] straight to the dispatcher); producers modify
+  the pre-allocated objects rather than constructing them

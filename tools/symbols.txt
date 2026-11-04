@@ -79,3 +79,6 @@
 # 0x2001ccf8 = stream/channel manager ( +8/+0xc instance ptrs, +0x77c global enable)
 # 0x2000bae8 = channel dispatch table (8-byte stride entries)
 # 0x20000404 = central driver context (89 users)
+1028ba8 stream_ctrl_event_dispatch
+103496e cal_dwt_timed_op
+101d464 event_action_executor

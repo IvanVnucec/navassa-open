@@ -420,3 +420,18 @@ IRQ pin -> stream_int_handler (ack RMW @0x41000b0a)
 - event objects are PRE-ALLOCATED inside the dispatch table entries
   (handlers pass table[i] straight to the dispatcher); producers modify
   the pre-allocated objects rather than constructing them
+
+## Round 15 — driver context field map (partial)
+
+Method attempt: literal-site + forward dataflow scan. Naive heuristic
+(find nearest referencing ldr, extract following [reg,#off] accesses)
+yields only partial results — shared literal pools break the nearest-ldr
+assumption. Partial result:
+  +0x22 — most-used context field (x10 sites; candidates: 0x1007254,
+          0x100cf1a, 0x101d5da) — likely the stream/channel status word
+  +0x10, +0x0c — single uses
+Proper approach for the full field map: load firmware.elf into Ghidra and
+use its dataflow/struct analysis, or extend the tracer to log the
+containing instruction per MMIO/RAM access at runtime (runtime values
+disambiguate what static analysis cannot). Mark as tooling-limited;
+continue with other threads meanwhile.

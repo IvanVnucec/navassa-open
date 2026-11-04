@@ -302,3 +302,17 @@ Confirmed by decode + tail-shape:
   exact xQueueGenericSend/Receive entries, timers.c block, then the ADI
   app modules (scheduler.c surfacing around 0x101b88c; app data blocks
   0x20000404 x115 refs etc.)
+
+## Round 7 findings
+
+- 0x0102bf6c = taskENTER_CRITICAL wrapper: BASEPRI=0x30 + uxCriticalNesting
+  increment at 0x2000b650+4 + not-in-ISR assert (ICSR VECTACTIVE read)
+- port statics block @0x2000b650: [+0] ucMaxSysCallPriority (byte, 0x30),
+  [+4] uxCriticalNesting
+- prvIsQueueEmpty/Full pair @0x102b2a6/8 (uxMessagesWaiting@Queue+0x40)
+- Queue_t layout pinned (see round 6); big queue functions at 0x102aec0
+  (GenericReceive-family: 4 args, peek flag), 0x102afd6
+  (SemaphoreTake-family), FromISR pair 0x102b06a/0x102b198, lock-recovery
+  helper 0x102b32c (cRxLock/cTxLock byte handling)
+- names tentative-but-structure-backed; verify by tracecmp when the queue
+  path gets exercised end-to-end

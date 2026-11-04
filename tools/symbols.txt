@@ -61,3 +61,13 @@
 # tasks.c extras
 101b524 vTaskRemoveFromUnorderedEventList
 101b4fc vTaskPlaceOnEventList
+# queue.c (tentative but structure-backed)
+102aec0 xQueueGenericReceive
+102afd6 xQueueSemaphoreTake
+102b06a xQueueReceiveFromISR_A
+102b198 xQueueReceiveFromISR_B
+102b32c queue_unlock_helper
+102b2a6 prvIsQueueEmpty_A
+102b2a8 prvIsQueueFull_B
+102bf6c task_enter_critical
+# port statics: 0x2000b650 = ucMaxSysCallPriority(+0), uxCriticalNesting(+4)

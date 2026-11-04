@@ -111,7 +111,7 @@ in `build/Navassa_EvaluationFw.asm`.
 
 ## Status
 
-- [ ] Step 0 — differential tracer + harness mode
+- [x] Step 0 — differential tracer + harness mode
 - [ ] Step 1 — function map
 - [ ] Step 2.1 — startup/vector table *(done: `src/navassa_open_startup.s`)*
 - [ ] Step 2.2 — leaf helpers

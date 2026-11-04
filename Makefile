@@ -65,5 +65,9 @@ emulate-closed: $(EMULATOR_BIN) $(NVSS_CLOSED_BIN)
 
 emulate: emulate-open
 
+# Step 0 smoke test: differential tracer self-comparison (must MATCH)
+smoke-compare: $(EMULATOR_BIN) $(NVSS_CLOSED_BIN)
+	./$(EMULATOR_BIN) --compare $(NVSS_CLOSED_BIN) $(NVSS_CLOSED_BIN) $(NVSS_BASE_ADDR) $(TIMEOUT_MS)
+
 clean:
 	rm -rf $(BUILD_DIR)/

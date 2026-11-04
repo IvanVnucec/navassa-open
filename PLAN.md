@@ -205,3 +205,28 @@ structural identification:
   the application layer on top of it
 - ICSR fact correction: PENDSVSET = bit28 = 0x10000000 (not 0x80000000 —
   that is NMIPENDSET; ADI wrappers do write 0x80000000 deliberately)
+
+## Kernel data layout mapped (session 2)
+
+xTaskIncrementTick (0x0101b364) and vTaskSwitchContext (0x0101b42e) both
+address kernel globals through merged static bases (Keil-style base merging):
+
+- Block A @ 0x2001e1ac (tasks.c-ish globals):
+  +0x28 pxDelayedTaskList, +0x2c pxOverflowDelayedTaskList (swapped on tick
+  wrap), +0x4c xTickCount, +0x58 xYieldPending, +0x5c (tbd, inc'd on wrap),
+  +0x64 xNextTaskUnblockTime, +0x6c uxSchedulerSuspended
+- Block B @ 0x2001e4ec:
+  +0x00 pxReadyTasksLists[] (List_t, 20 B each → configMAX_PRIORITIES = 6),
+  +0x78 pxCurrentTCB (= 0x2001e564 ✓ matches literal pool), +0x7c
+  uxTopReadyPriority used as CLZ bit-map
+  → configUSE_PORT_OPTIMISED_TASK_SELECTION = 1
+- TCB: uxPriority at TCB+0x44 (matches V10.2.1 layout with
+  configMAX_TASK_NAME_LEN etc.)
+- ListItem_t = 20 bytes ✓ (V10.2.1)
+- configMAX_SYSCALL_INTERRUPT_PRIORITY: PendSV masks with 0x30 (3<<4);
+  ADI's basepri_cap helper caps at 0x60 — two constants coexist, TBD which
+  is configMAX vs an ADI-specific ceiling
+
+Next: map remaining kernel functions by their references to these bases
+(any function loading 0x2001e1ac/0x2001e4ec from a literal pool is a
+kernel function; offset usage pattern identifies its role).

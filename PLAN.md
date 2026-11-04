@@ -520,3 +520,20 @@ b) OFFLINE DECOMPRESSION: implement the RLE decoder in Python (algorithm
    mapping, bypass the buggy path entirely. RECOMMENDED — no toolchain
    risk, and the decompressed payload becomes a first-class artifact for
    the RAM-payload translation campaign.
+
+## Round 20 — the payload decompressor identified (LZ77 variant)
+
+Correctly-aligned decode (tools/decompressor.asm): entry 0x0100296a,
+descriptor-driven: desc[0]=offset (src = desc+offset), desc[4]=size
+(bit0 selects initial phase), desc[8]=destination. Phases:
+- literal byte-copy loop (r1 = count)
+- back-reference loop: distance = ((token&3)<<8 | next_byte) copied
+  BACKWARD from dest (rsbs r1 = -dist; src = dest - dist)
+- main token loop: token byte: low2 bits = type/flags, high nibble =
+  run length, 0xF = escape to extended byte lengths
+- source end = src + (size>>1)!! (size halved — packed nibbles?)
+The 0x01044000+ region holds the COMPRESSED payload; it expands in place
+toward 0x01047fe4+ and beyond the binary end (hence the 1MB window).
+Remaining: pin the descriptor construction (handoff 0x010442a6 sets up
+r9/sb and the desc) and implement tools/decompress.py to expand the
+payload offline (option b) — bypassing the unicorn fault entirely.

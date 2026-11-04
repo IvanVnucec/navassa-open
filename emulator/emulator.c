@@ -303,13 +303,13 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 	/* expansion region as a SEPARATE map (split maps dodge a translation
 	 * cache interaction seen with one big writable region) */
 	if (fw_map_size < 0x100000)
-		uc_mem_map(uc, firmware_base + fw_map_size, 0x100000 - fw_map_size, UC_PROT_ALL);
+		uc_mem_map(uc, firmware_base + fw_map_size, 0x100000 - fw_map_size, UC_PROT_READ | UC_PROT_WRITE);
 	/* Cortex-M boot alias: ONLY the vector table region is mirrored at
 	 * 0x00000000 (VTOR=0 exception fetches need it before the firmware
 	 * sets VTOR). Mirroring the whole image caused translation-cache
 	 * collisions between the two maps (backward branches reported as
 	 * invalid instructions after code-region writes). */
-	uc_mem_map(uc, 0x0, 0x1000, UC_PROT_ALL);
+	uc_mem_map(uc, 0x0, 0x1000, UC_PROT_READ | UC_PROT_WRITE);
 	uc_mem_write(uc, 0x0, code, 0x1000);
 	uc_mem_map(uc, RAM_BASE, RAM_SIZE, UC_PROT_ALL);
 	uc_mem_map(uc, MMIO_BASE, MMIO_SIZE, UC_PROT_READ | UC_PROT_WRITE);

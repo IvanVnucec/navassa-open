@@ -112,7 +112,7 @@ in `build/Navassa_EvaluationFw.asm`.
 ## Status
 
 - [x] Step 0 — differential tracer + harness mode
-- [ ] Step 1 — function map
+- [x] Step 1 — function map (tools/func_map.py: 1774 functions, 1649 BL targets, 255 vector slots; tools/functions.asm = clean per-function disassembly; tools/symbols.txt = name registry)
 - [ ] Step 2.1 — startup/vector table *(done: `src/navassa_open_startup.s`)*
 - [ ] Step 2.2 — leaf helpers
 - [ ] Step 2.3 — reset handler → `main()`

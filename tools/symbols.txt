@@ -1,0 +1,28 @@
+# Known symbols for the closed Navassa evaluation firmware.
+# Format: <hex addr without 0x> <name>   (thumb addresses: use even addr)
+# Extend as functions are identified; func_map.py merges these into the map.
+1044190 reset_handler
+1002938 set_priority
+1002964 restore_priority
+1005fcc set_priority_6_wrapper
+1005fd2 restore_priority_wrapper
+10060fe get_periph_ptr
+10060de read_periph_reg
+100616e periph_init_a
+1006164 periph_init_b
+100617e periph_init_c
+100609a periph_init_d
+10060b2 periph_init_e
+10060e4 periph_init_f
+100aca0 systick_nvic_enable
+1002a40 periph_pin_init
+1002db4 periph_pin_init_helper
+10060cc init_write_boot_byte
+100600c init_nvic_priorities
+1002878 mainloop_store_const
+104423c check_ram_words_equal
+100ae34 mailbox_xfer
+1044180 ram_trampoline_a
+1044188 ram_trampoline_b
+1044254 nvic_enable_helper
+100ac4d default_handler

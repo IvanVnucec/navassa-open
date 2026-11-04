@@ -133,7 +133,7 @@ earlier guesses (GPIO / GPT timer / watchdog / SEMA4) have been dropped.
 | 0x49000014 | write  | Written `0x00000000` during the init sequence. No reads identified. |
 | 0x49000018 | write  | Written `0x00000000` during init sequence. |
 | 0x4600xxxx | read/write | Multiple byte-offset accesses (e.g. 0x102, 0x2d3, 0x331, 0x3fb, 0x43f, 0x4e0, 0x590, 0x5a8). |
-| 0x47002004 | read   | Read by `sub_100ae54` (see §6). |
+| 0x47002004 | read   | Read by `sub_100ae34` (see §6). |
 | 0xe000e000 | —      | NVIC (System Control Block, Cortex-M). |
 | 0xe000e010 | —      | SysTick (Cortex-M). |
 
@@ -172,7 +172,7 @@ peripherals that are set up by the external CPU are not modeled:
   into the real RAM firmware (return address 0x20036fa7) and **faults at
   PC=0x00000000** — the same gap as strategy A.
 - With the boot byte left at 0 (unseeded RAM), the alternate path gets as far as
-  `sub_100ae54`, which:
+  `sub_100ae34`, which:
   - reads a word from **0x47002004** (a peripheral register, likely a counter),
   - stores it into a RAM control block at **0x200020d1** (`[r7+4]`),
   - loads a buffer pointer from **0x2002516c** and writes to it —
@@ -190,7 +190,7 @@ CPU (or an earlier boot stage) normally initializes.
 2. Implement SysTick so it doesn't fault on first tick.
 3. Initialize the RAM structures the firmware expects, e.g. the buffer pointer at
    0x2002516c and the control block at 0x200020d1.
-4. Identify and model the peripheral at 0x47002004 (read by sub_100ae54).
+4. Identify and model the peripheral at 0x47002004 (read by sub_100ae34).
 5. Trace which peripheral addresses are read vs written to infer their roles.
 6. Determine what RAM state the external CPU must pre-seed (the boot byte at
    0x2001fcee, buffer pointers, etc.) for each boot path.

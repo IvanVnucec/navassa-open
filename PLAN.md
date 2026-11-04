@@ -230,3 +230,23 @@ address kernel globals through merged static bases (Keil-style base merging):
 Next: map remaining kernel functions by their references to these bases
 (any function loading 0x2001e1ac/0x2001e4ec from a literal pool is a
 kernel function; offset usage pattern identifies its role).
+
+## Kernel function inventory (session 3)
+
+Functions referencing the kernel data bases (literal-scan method):
+- 0x0101b88c — bridge function: reads A[0x4c] (xTickCount) into caller's
+  out-pointer (arg4), byte state at A[0x50] set to 2, jump-table dispatch on
+  arg2 (0..4), calls pendsv_yield wrapper (0x100aca0), 0x102bfdc, 0x101b21e —
+  scheduler.c-style function using kernel internals (naming TBD)
+- 0x0101b9d8 — touches A[0x0,0x28,0x2c,0x4c,0x64]; B[0x78,0x7c] — candidate
+  xTaskResumeAll (unblock + tick re-merge pattern) (naming TBD)
+
+Observation: queue.c/timers.c keep their own statics (other merged blocks);
+find them the same way via a known queue/timer anchor. Also: significant
+application code lives in FLASH too (top referenced RAM addresses:
+0x20000404 x115 refs, 0x2001c230 x49, 0x2001ccf8 x46, 0x20002100 x44,
+0x2001d918 x36 — these are app/driver global blocks worth anchoring).
+
+Method note: literal-scan + containing-function attribution + capstone
+(CS_MODE_MCLASS!) offset extraction works well; reuse tools/fros_match.py
+ideas for the ADI module hunt.

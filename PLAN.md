@@ -285,3 +285,20 @@ Confirmed by decode + tail-shape:
   basepri_raise (taskENTER_CRITICAL users) currently only the ADI
   scheduler ops — queue.c cluster still unanchored (its critical
   sections may inline differently)
+
+## Round 6 findings
+
+- Queue_t layout confirmed in closed code (V10.2.1): pcHead@0, pcTail@4,
+  pcWriteTo@8, u@0xc..0x14, xTasksWaitingToSend@0x18, 
+  xTasksWaitingToReceive@0x2c, uxMessagesWaiting@0x40, cRxLock@0x44,
+  cTxLock@0x45
+- queue.c cluster located: sites 0x102b05a/0x102b190/0x102b32c tail-call
+  vTaskRemoveFromUnorderedEventList; 0x102b3cc manipulates cRxLock/cTxLock
+  bytes (lock recovery path); callers of vTaskPlaceOnEventList
+- pvPortMalloc found (0x101bd1e, heap_4): min-ever-free update against
+  [0x2000d098+0x10]; heap globals block @0x2001d098
+- vTaskPlaceOnEventList @0x101b4fc (event-item insert + delayed tail call)
+- naming workflow proven end-to-end for kernel modules; remaining: pin
+  exact xQueueGenericSend/Receive entries, timers.c block, then the ADI
+  app modules (scheduler.c surfacing around 0x101b88c; app data blocks
+  0x20000404 x115 refs etc.)

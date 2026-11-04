@@ -52,3 +52,12 @@
 101b70e ulTaskNotifyTake
 101b75e xTaskNotifyWait
 101b6bc prvGetNextUnblockTime
+# queue.c cluster (structural: Queue_t field usage + wakeup tail calls)
+102b32c queue_send_recv_cluster_A
+102b3cc queue_lock_helper_B
+# heap_4
+101bd1e pvPortMalloc
+101b348 heap_block_probe
+# tasks.c extras
+101b524 vTaskRemoveFromUnorderedEventList
+101b4fc vTaskPlaceOnEventList

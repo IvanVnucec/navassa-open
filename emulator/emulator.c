@@ -271,6 +271,12 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 	/* Memory map: flash, RAM, MMIO window, Cortex-M system control,
 	 * plus the harness return page. */
 	uc_mem_map(uc, firmware_base, align_page(fsize), UC_PROT_ALL);
+	/* Cortex-M boot alias: flash also mapped at 0x00000000 so that the
+	 * default VTOR=0 exception vector table works (the firmware pends
+	 * NMIs/SVCs before it ever sets VTOR — without the alias every
+	 * exception faults to PC=0). */
+	uc_mem_map(uc, 0x0, align_page(fsize), UC_PROT_ALL);
+	uc_mem_write(uc, 0x0, code, fsize);
 	uc_mem_map(uc, RAM_BASE, RAM_SIZE, UC_PROT_ALL);
 	uc_mem_map(uc, MMIO_BASE, MMIO_SIZE, UC_PROT_READ | UC_PROT_WRITE);
 	uc_mem_map(uc, SCB_BASE, SCB_SIZE, UC_PROT_READ | UC_PROT_WRITE);
@@ -362,6 +368,25 @@ static int do_boot_run(const char *bin, uint64_t firmware_base, uint64_t timeout
 
 	uc_reg_write(uc, UC_ARM_REG_SP, &sp);
 	uc_reg_write(uc, UC_ARM_REG_PC, &reset_vec);
+
+	/* SEED env: comma-separated addr=val pairs (hex), applied before the
+	 * run — models the external CPU's pre-seeding of RAM (stack parameter
+	 * block, boot state, mailbox structures...). */
+	const char *seedenv = getenv("SEED");
+	if (seedenv) {
+		char buf[1024];
+		strncpy(buf, seedenv, sizeof(buf) - 1);
+		buf[sizeof(buf) - 1] = 0;
+		for (char *tok = strtok(buf, ","); tok; tok = strtok(NULL, ",")) {
+			char *eq = strchr(tok, '=');
+			if (!eq) continue;
+			*eq = 0;
+			uint32_t sa = strtoul(tok, NULL, 16);
+			uint32_t sv = strtoul(eq + 1, NULL, 16);
+			uc_mem_write(uc, sa, &sv, 4);
+			printf("[%s] seed 0x%08x = 0x%08x\n", label, sa, sv);
+		}
+	}
 
 	printf("[%s] boot run: SP=0x%08x PC=0x%08x\n", label, sp, reset_vec);
 	uc_err err = uc_emu_start(uc, reset_vec | 1, 0, timeout_ms * 1000, 0);

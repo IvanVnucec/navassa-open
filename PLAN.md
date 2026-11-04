@@ -462,3 +462,31 @@ of the translation.
 
 TODO: map the full parameter-block layout (stack offsets + meanings),
 seed it in the emulator, re-run, and follow the app deeper.
+
+## Round 17 — BREAKTHROUGH: flash alias + stack seeding unblocks the app
+
+Two fixes:
+1. **Flash alias at 0x00000000** (standard Cortex-M boot remap): the
+   firmware pends NMI/SVC exceptions BEFORE setting VTOR; with VTOR=0 the
+   exception fetch goes to address 0 — previously unmapped = the original
+   "PC=0 fault" that blocked strategy A. With the alias, exceptions
+   vector correctly into the real table.
+2. **Stack parameter seeding via new SEED env** (comma-separated
+   addr=val): the two trampoline entry points consume pre-seeded 0x50-byte
+   stack frames; frame N's saved-pc must hold the boot return address
+   (0x010441ad / 0x010441b5).
+
+Result: 86 events -> 33,717 events. The app now:
+- runs the RAM float-calc entries (returns ADI error 0xff19 with zeroed
+  params — plausible without real host data)
+- executes a massive initialization memset (~8KB+ zeroed at 0x2000e000+,
+  plus 0x20020000, kernel blocks 0x2001e000/400, RAM data 0x20038000)
+- the 0x010029ae/b2 "idle loop" is actually the memset BYTE-TAIL loop
+- stops in the scheduler-handoff helper region (0x010442b1) — next
+  unseeded structures to identify
+- driver context 0x20000404 still untouched (init not complete yet)
+
+Seed used:
+SEED="0x200255cc=0x010441ad,0x200255f4=0x010441b5,0x2002558d=0x20,
+0x2002559d=0x20,0x20025596=0x0100,0x200255a6=0x0100,0x20025588=0x20,
+0x200255a9=0x20,0x200255ad=0x40"

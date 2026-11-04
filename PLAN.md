@@ -66,7 +66,7 @@ Certain RAM addresses are part of the external interface:
 
 - `0x2001fced` — boot state byte (`0x2001fcee` is checked against 9)
 - `0x200020d1` — control block used by `sub_100ae54`
-- `0x2002f450` / `0x2002f454` — compared for equality by `sub_104423c`
+- `0x200250f4` / `0x200250f8` — compared for equality by `sub_104423c`
 - `0x2002516c` — buffer pointer (NULL if unseeded → fault)
 
 The C rebuild won't land data at the same addresses automatically — place these
@@ -149,8 +149,8 @@ This changes the reconstruction strategy in our favor:
 - [x] Step 2.2 — leaf helpers (set_priority, restore_priority, get_periph_ptr,
       read_periph_reg, init_write_boot_byte, periph_init_a..f — all 9 verified
       against the closed firmware with tools/tracecmp.sh)
-- [ ] Step 2.3 — reset handler → `main()`
-- [ ] Step 2.4 — init sequence
+- [x] Step 2.3 — reset handler → `main()` (src/navassa_open.c; boot trace matches closed for all 35 pre-handoff events with STUB_RAM=1)
+- [x] Step 2.4 — init sequence (init_sequence + pin_init + fpu_faults_enable verified; boot_msg 0x01002a78 still TODO)
 - [ ] Step 2.5 — main loop / scheduler
 - [ ] Step 2.6 — host communication
 - [ ] Step 2.7 — RAM payload

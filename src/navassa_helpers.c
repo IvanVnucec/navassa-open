@@ -40,7 +40,7 @@ void set_priority(uint32_t prio)
 	__asm volatile ("mrs %0, basepri" : "=r" (basepri));
 
 	if (r0 != 0 && x < r0)
-		NAVASSA_SCB_BASEPRI = (uint8_t)x;
+		__asm volatile ("msr basepri, %0" : : "r" (x) : "memory");
 
 	__asm volatile ("msr primask, %0" : : "r" (primask));
 }

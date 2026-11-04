@@ -19,10 +19,16 @@
 1002db4 periph_pin_init_helper
 10060cc init_write_boot_byte
 100600c init_nvic_priorities
-1002878 mainloop_store_const
+1002878 set_vtor_flash
 104423c check_ram_words_equal
 100ae34 mailbox_xfer
 1044180 ram_trampoline_a
 1044188 ram_trampoline_b
 1044254 nvic_enable_helper
 100ac4d default_handler
+100600c init_sequence
+1002a40 pin_init
+1002db4 pin_update
+1044254 fpu_faults_enable
+1044278 scheduler_handoff
+1002a78 boot_msg

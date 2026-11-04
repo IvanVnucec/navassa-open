@@ -60,26 +60,30 @@ Verified line-by-line against the disassembly:
 ├── ldrb r0, [r4,#1]                   read RAM byte at 0x2001fcee
 ├── cmp r0, #9
 │   └── == 9:  strb #3, [r4,#0]        boot state = 3
-├── bl 0x0100600c                      init function (NVIC priority inits ×8)
-│   ├── bl 0x0100616e                  periph_init_a(id)
-│   ├── bl 0x01006164                  periph_init_b(id)
-│   ├── bl 0x0100617e                  periph_init_c(id)
-│   ├── bl 0x0100609a                  periph_init_d(id)
-│   ├── bl 0x010060b2                  periph_init_e(id)
-│   └── bl 0x010060e4                  periph_init_f(id)
+├── bl 0x0100600c                      init_sequence: periph_init_a..f(0)
+│   (clears the configured bitfields of 0x49000014 and 0x49000018)
 ├── bl 0x01044180  ──→ 0x20036e24      ** indirect jump into RAM firmware **
-├── bl 0x01002a40                      peripheral/pin init (calls 0x01002db4)
+├── bl 0x01002a40                      pin_init (0x4600029c/9d bytes, see below)
 ├── ldrb r0, [r4,#0]                   read boot state
-│   └── != 0 → 0x010441ca (main loop)
+│   └── != 0 → 0x010441ca (main-loop entry)
 ├── bl 0x01044188  ──→ 0x20036e32      second indirect jump into RAM
-├── bl 0x0104423c                      compares [0x2002f450] with [0x2002f454]
+├── bl 0x0104423c                      check_ram_words_equal:
+│   compares [0x200250f8] with [0x200250f4] (in that order);
 │   └── equal → 0x010441ca
-├── movs r0,#2; bl 0x010060b2; b.n .   failure path: infinite loop
+├── movs r0,#2; bl 0x010060b2; b.n .   failure path: periph_init_e(2), halt
 └── 0x010441ca  main-loop entry
     ├── strb #2, [r4,#0]               boot state = 2
-    ├── bl 0x01002878                  writes a constant to a RAM word
-    └── further init follows (writes 0x70000 to a peripheral,
-        NVIC enable via 0x01044254, ...)
+    ├── bl 0x01002878                  set_vtor_flash: SCB->VTOR = 0x01000000
+    ├── SCB->SHCSR = 0x70000           (MemManage/Bus/Usage fault enables)
+    ├── bl 0x01044254                  fpu_faults_enable: CPACR |= 0xF00000
+    │                                  (FPU enable), DSB/ISB, FPSCR = FZ
+    ├── host flag = *(0x460003fb) & 1  → stored to 0x2001fd22
+    ├── flag != 0: *(0x200002d4) = 0x0104422c (code/data blob ptr),
+    │             *(0x200002d8) = 0x99, bl 0x01002a78 boot_msg(1, 0xEA02, 3)
+    │             (0x1002a78 stores LR to hook slot 0x20000228, calls
+    │              mailbox_xfer, dispatches periph_init_b/c/a)
+    └── b.w 0x01044278                 handoff into the RTOS application
+        (this path also zeroes 20 bytes at 0x2001fcec — memset inlined)
 ```
 
 The reset handler adapts its behavior based on the boot state byte at
@@ -108,17 +112,31 @@ external CPU pre-seeding RAM before releasing the M4 core at every power reset.
 | 0x01044180 | `ldr.w pc, [pc]` — trampoline, loads target from literal pool. |
 | 0x01044188 | Same pattern, different literal. |
 
-### Per-init pattern (repeated 8 times in boot)
+### Init call pattern
 
-Each of the 8 init steps follows the same pattern:
+Each periph_init helper (a–f) follows the same shape:
 
-1. Store return context on stack (`0x20025570`/`0x20025574` pair)
-2. Call `set_priority(6)` → `set_priority` → NVIC/SysTick enable
-3. Read peripheral register via `read_periph_reg()`
-4. Modify bitfield
-5. Write back to peripheral
-6. Call `restore_priority` → restore BASEPRI
-7. Restore return context, continue
+1. Stash the id/pointer in r4, call `prio_yield_hook(6)` (no-op unless the
+   shifted field is 0)
+2. Read the register (0x49000014 via `read_periph_reg`, or 0x49000018 direct)
+3. Modify the assigned bitfield
+4. Write back
+5. Shared epilogue (0x0100618e): pop {r4, lr} → `basepri_set(id)` —
+   BASEPRI = id (system register write, no bus transaction)
+
+Field map (all verified trace-identical in the open reimplementation):
+
+| Helper | Register | Field |
+|--------|----------|-------|
+| a (0x0100616e) | 0x49000018 | low halfword = id |
+| b (0x01006164) | 0x49000014 | high halfword = id << 16 |
+| c (0x0100617e) | 0x49000018 | high halfword = id << 16 |
+| d (0x0100609a) | 0x49000014 | bits [1:0] = id |
+| e (0x010060b2) | 0x49000014 | bits [7:4] = id << 4 |
+| f (0x010060e4) | 0x49000014 | bits [3:2] = id << 2 |
+
+`init_write_boot_byte` (0x010060cc) is special: it writes the extracted
+nibble to a RAM byte pointer instead of back to the register.
 
 ## 4. RAM Firmware
 
@@ -211,10 +229,25 @@ CPU (or an earlier boot stage) normally initializes.
 ### Current state
 
 - `src/navassa_open_startup.s` — minimal Cortex-M startup: vector table + `main()`
-- `src/navassa_open.c` — `void main(void) { while(1) {} }`
-- `emulator/emulator.c` — Unicorn emulator (merged: both strategies below)
-- `Makefile` — `make emulate-closed` runs the closed firmware; `make emulate-open`
-  runs the open replacement
+- `src/navassa_open.c` — `main()` = full reconstruction of the closed reset
+  handler (0x01044190), with the RAM-payload trampolines, `boot_msg`
+  (0x01002a78) and the scheduler handoff (0x01044278) stubbed (Step 2.4/2.7)
+- `src/navassa_helpers.c` — the 9 flash leaf helpers, all trace-verified
+- `src/navassa_init.c` — init layer (init_sequence, pin_update, pin_init,
+  check_ram_words_equal, set_vtor_flash, fpu_faults_enable), all trace-verified
+- `src/navassa_mmio.h` / `src/navassa_fw.h` — MMIO/contract registry + prototypes
+- `emulator/emulator.c` — Unicorn emulator with differential tracer,
+  `--compare`, `--call` harness, `STUB_RAM`/`TRACE`/`TRACE_OUT` modes
+- `tools/tracecmp.sh` — per-function verification workflow
+- `tools/func_map.py` + `tools/function_map.txt` + `tools/functions.asm`
+
+### Boot equivalence status
+
+With `STUB_RAM=1` (both RAM trampoline entries stubbed with BX LR), the open
+firmware's boot trace matches the closed firmware for **all 35 pre-handoff
+events** (values included). The closed trace has 5 extra events after the
+0x01044278 handoff: an inlined memset zeroing 20 bytes at 0x2001fcec —
+Step 2.7 scope.
 
 ### Emulator features (merged)
 

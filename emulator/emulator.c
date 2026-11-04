@@ -71,7 +71,7 @@
 static const struct { uint32_t lo, hi; } contract_ram[] = {
 	{ 0x2001fcec, 0x2001fd00 },	/* boot state (0x2001fced / 0x2001fcee) */
 	{ 0x200020d0, 0x200020e0 },	/* sub_100ae54 control block */
-	{ 0x2002f440, 0x2002f460 },	/* words compared by sub_104423c */
+	{ 0x200250f0, 0x20025100 },	/* words compared by check_ram_words_equal */
 	{ 0x20025160, 0x20025180 },	/* buffer pointer used by sub_100ae54 */
 };
 #define N_CONTRACT (sizeof(contract_ram) / sizeof(contract_ram[0]))
@@ -282,6 +282,7 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 	if (stub_ram) {
 		uint16_t bx_lr = BX_LR;
 		uc_mem_write(uc, RAM_FW_BASE, &bx_lr, sizeof(bx_lr));
+		uc_mem_write(uc, RAM_FW_BASE + 0xe, &bx_lr, sizeof(bx_lr));
 		uint8_t boot_byte = BOOT_BYTE_VAL;
 		uc_mem_write(uc, BOOT_BYTE_ADDR, &boot_byte, sizeof(boot_byte));
 		printf("[*] STUB_RAM: RAM entry stubbed with BX LR, "

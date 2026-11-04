@@ -435,3 +435,30 @@ use its dataflow/struct analysis, or extend the tracer to log the
 containing instruction per MMIO/RAM access at runtime (runtime values
 disambiguate what static analysis cannot). Mark as tooling-limited;
 continue with other threads meanwhile.
+
+## Round 16 — MAJOR FINDING: stack-based parameter block
+
+Runtime trace (TRACE_RAM_ALL, no stubs) shows the RAM payload entry
+(0x20036e24) is a FLOAT CALCULATION routine reading its arguments from the
+INITIAL STACK:
+- bytes at [sp+0x8], [sp+0xd], [sp+0x19], [sp+0x29], [sp+0x2d]
+- int16s at [sp+0x16], [sp+0x26]
+- constants: 0x3d800000 (0.0625) and neighbors in its literal pool
+  (0x20036f08+)
+- error codes returned in r0: 0xff18/0xff19/0xff1a/0xff1b/0xff1c
+  (ADI error-code range)
+- epilogue: add sp,#0x30; vpop {d8}; pop {r1,r4,r5,r6,r7,pc} — matches
+  the trace's final stack reads exactly
+
+=> THE EXTERNAL CPU SEEDS THE M4's INITIAL STACK with a parameter block
+   before release; this is part of the load-time contract (alongside the
+   RAM byte at 0x2001fcee). The emulator must pre-seed stack contents to
+   emulate the real handoff — that is why the app currently goes quiet
+   after the first RAM call.
+
+Also confirmed: the trace replays the verified boot C functions
+(init_write_boot_byte, init_sequence, pin RMWs) — live cross-validation
+of the translation.
+
+TODO: map the full parameter-block layout (stack offsets + meanings),
+seed it in the emulator, re-run, and follow the app deeper.

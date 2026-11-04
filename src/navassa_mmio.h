@@ -26,7 +26,8 @@
 #define NAVASSA_BOOT_STATE	((volatile uint8_t *)0x2001fcedUL)
 /* control block used by mailbox_xfer (sub_100ae34): [0]=flag byte,
  * [4]=last counter value */
-#define NAVASSA_MBOX_CTRL	((volatile uint32_t *)0x200020d0UL)
+/* flag byte at 0x2000d120, last-counter word at 0x2000d124 (unaligned) */
+#define NAVASSA_MBOX_CTRL	((volatile uint8_t *)0x2000d120UL)
 /* words compared for equality by check_ram_words_equal (sub_104423c) */
 #define NAVASSA_CHK_A		(*(volatile uint32_t *)0x200250f4UL)
 #define NAVASSA_CHK_B		(*(volatile uint32_t *)0x200250f8UL)

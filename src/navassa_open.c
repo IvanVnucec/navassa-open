@@ -7,7 +7,7 @@
  * binary with tools/tracecmp.sh; the RAM-firmware trampoline calls are
  * stubbed until Step 2.7 (RAM payload reconstruction).
  */
-#include "navassa_mmio.h"
+#include "navassa_fw.h"
 
 /* from navassa_helpers.c */
 void set_priority(uint32_t prio);
@@ -36,15 +36,8 @@ void fpu_faults_enable(void);
 static void ram_entry_a(void) { /* TODO Step 2.7 */ }
 static void ram_entry_b(void) { /* TODO Step 2.7 */ }
 
-/* ---- closed 0x01002a78 boot_msg(a, b, c): stores LR into the hook slot
- * 0x20000228, calls mailbox_xfer(8, b), dispatches periph_init_b/c/a on a,
- * and more (partially analyzed). TODO: full reconstruction (Step 2.4). */
-static void boot_msg(uint32_t a, uint32_t b, uint32_t c)
-{
-	(void)a; (void)b; (void)c;	/* TODO Step 2.4 — not reached with
-					 * zeroed RAM in emulation (host
-					 * flag at 0x460003fb reads 0) */
-}
+/* ---- closed 0x01002a78 boot_msg(a, b, c) — real implementation lives in
+ * navassa_mailbox.c (verified); declared in navassa_fw.h. */
 
 /* ---- closed 0x01044278: scheduler handoff into the RTOS application
  * (FreeRTOS kernel start). TODO Step 2.7. */

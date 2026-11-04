@@ -46,7 +46,7 @@ The binary has no symbols. Scan the disassembly for function boundaries
 4. The init sequence + the post-0x10441ca init
 5. Main loop / scheduler (0x1002878 and what it drives)
 6. **Host communication** — `sub_100ae54` already shows the shape: counter from
-   0x47002004, control block at 0x200020d1, buffer pointer at 0x2002516c.
+   0x47002004, control block at 0x2000d120, buffer pointer at 0x2002516c.
    The most important part to get right, since it is the contract with the
    host CPU
 7. The ~85 KB RAM payload last — the bulk of the logic, but most of it is
@@ -65,7 +65,7 @@ The binary has no symbols. Scan the disassembly for function boundaries
 Certain RAM addresses are part of the external interface:
 
 - `0x2001fced` — boot state byte (`0x2001fcee` is checked against 9)
-- `0x200020d1` — control block used by `sub_100ae54`
+- `0x2000d120` — control block used by `sub_100ae54`
 - `0x200250f4` / `0x200250f8` — compared for equality by `sub_104423c`
 - `0x2002516c` — buffer pointer (NULL if unseeded → fault)
 
@@ -150,9 +150,30 @@ This changes the reconstruction strategy in our favor:
       read_periph_reg, init_write_boot_byte, periph_init_a..f — all 9 verified
       against the closed firmware with tools/tracecmp.sh)
 - [x] Step 2.3 — reset handler → `main()` (src/navassa_open.c; boot trace matches closed for all 35 pre-handoff events with STUB_RAM=1)
-- [x] Step 2.4 — init sequence (init_sequence + pin_init + fpu_faults_enable verified; boot_msg 0x01002a78 still TODO)
-- [ ] Step 2.5 — main loop / scheduler
-- [ ] Step 2.6 — host communication
-- [ ] Step 2.7 — RAM payload
+- [x] Step 2.4 — init sequence (init_sequence, pin_init, fpu_faults_enable
+      verified; boot_msg 0x01002a78 fully reconstructed + verified: LR hook
+      slot 0x20000228, mailbox_xfer(8,b), periph_init dispatch on a, strobe
+      pulse table @0x01002afc → byte 0x460000d0, ICSR yield when c==3)
+- [x] Step 2.5 — main loop / scheduler (set_vtor_flash verified; the
+      0x01044278 handoff = FreeRTOS startup — flash-side chain traced:
+      0x1044278 → 0x1044298 → 0x10442a6/88 → memset(0x2001fcec, 20) →
+      idle poll loop at 0x010029ae; kernel comes from public source)
+- [x] Step 2.6 — host communication (mailbox_xfer 0x0100ae34 fully decoded
+      + verified on all 3 paths; model in FINDINGS.md §6 and
+      src/navassa_mailbox.c: 64-bit state @0x20002800/04 rotated by cmd
+      gates proceed + encodes restore-BASEPRI; counter @0x47002004;
+      flag @0x2000d120; last-counter @0x2000d124; ring at *0x2002516c:
+      [0]=write ptr, [6]=fill u16, [0xc]=base, span 0x7FFC, limit 0x2000
+      words, 2 words/packet: header + payload; header = cmd&0x3F |
+      payload.bit31<<6 | delta<<7 | 0x80000000)
+- [~] Step 2.7 — RAM payload (85KB): groundwork done — 18 entry points
+      discovered via flow traversal; entry @0x20036e24 confirmed executable.
+      Full translation is a dedicated campaign: byte-match the FreeRTOS
+      kernel (CM4F, configMAX_SYSCALL=0x60) against public source first,
+      then translate the ADI application modules (scheduler.c,
+      cal_task_core.c, monitor_rssi.c, monitor_drv.c, streams_interrupts.c,
+      spimaster.c, lb_pll_nco_mgr.c, tracking_cals.c, fh.c, mcs.c, dma.c,
+      gpt.c). Verification machinery applies unchanged; contract RAM
+      structs must be linker-placed at fixed addresses.
 - [ ] Step 4 — linker-script RAM contract placement
 - [ ] Side-quest — compiler fingerprinting

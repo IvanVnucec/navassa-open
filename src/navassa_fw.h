@@ -29,3 +29,7 @@ void set_vtor_flash(void);                   /* 0x01002878 */
 void fpu_faults_enable(void);                /* 0x01044254 */
 
 #endif /* NAVASSA_FW_H */
+
+/* navassa_mailbox.c */
+uint32_t mailbox_xfer(uint32_t cmd, uint32_t payload);  /* 0x0100ae34 */
+void boot_msg(uint32_t a, uint32_t b, uint32_t c);      /* 0x01002a78 */

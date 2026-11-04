@@ -203,22 +203,34 @@ peripherals that are set up by the external CPU are not modeled:
 - With the boot byte left at 0 (unseeded RAM), the alternate path gets as far as
   `sub_100ae34`, which:
   - reads a word from **0x47002004** (a peripheral register, likely a counter),
-  - stores it into a RAM control block at **0x200020d1** (`[r7+4]`),
+  - stores it into a RAM control block at **0x2000d120** (`[r7+4]`),
   - loads a buffer pointer from **0x2002516c** and writes to it —
     **the pointer is NULL in unseeded RAM**, so emulation stops with a
     null-pointer write at PC=0x0100ae7a (SP=0x20025538, R4=0xffffffc8,
     LR=0x0100ae51).
 
-This counter-read + buffer-write pattern suggests a mailbox/ring-buffer protocol
-with the host; the buffer pointer at 0x2002516c is part of the state the external
-CPU (or an earlier boot stage) normally initializes.
+This counter-read + buffer-write pattern is now fully decoded and verified
+as the **host mailbox** (see src/navassa_mailbox.c):
+
+- 64-bit state at 0x20002800/04: rotated right by (cmd & 0xFF); bit0 of
+  the result gates the transfer, the result value is written to BASEPRI
+  on completion
+- hardware counter read from 0x47002004; previous value kept at
+  0x2000d124 (unaligned word); their delta is packed into header bits
+  [14:7]
+- flag byte at 0x2000d120 gates the actual packet write
+- ring buffer control block at 0x2002516c: [0]=write ptr, [6]=fill count
+  (u16), [0xc]=ring base; span 0x7FFC bytes, limit 0x2000 words;
+  packet = header word + payload word (count +2)
+- BASEPRI capped at 0x60 during the transfer (FreeRTOS
+  configMAX_SYSCALL_INTERRUPT_PRIORITY = 6 << 4, configPRIO_BITS = 4)
 
 ### To emulate further
 
 1. Map the Cortex-M system exception vectors in RAM so faults don't jump to 0x00000000.
 2. Implement SysTick so it doesn't fault on first tick.
 3. Initialize the RAM structures the firmware expects, e.g. the buffer pointer at
-   0x2002516c and the control block at 0x200020d1.
+   0x2002516c and the control block at 0x2000d120.
 4. Identify and model the peripheral at 0x47002004 (read by sub_100ae34).
 5. Trace which peripheral addresses are read vs written to infer their roles.
 6. Determine what RAM state the external CPU must pre-seed (the boot byte at

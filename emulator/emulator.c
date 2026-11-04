@@ -70,7 +70,7 @@
 /* Contract RAM: part of the external interface — traced. */
 static const struct { uint32_t lo, hi; } contract_ram[] = {
 	{ 0x2001fcec, 0x2001fd00 },	/* boot state (0x2001fced / 0x2001fcee) */
-	{ 0x200020d0, 0x200020e0 },	/* sub_100ae54 control block */
+	{ 0x2000d120, 0x2000d130 },	/* sub_100ae54 control block */
 	{ 0x200250f0, 0x20025100 },	/* words compared by check_ram_words_equal */
 	{ 0x20025160, 0x20025180 },	/* buffer pointer used by sub_100ae54 */
 };
@@ -111,8 +111,12 @@ static void ev_push(char kind, uint32_t addr, int size, uint32_t value, uint32_t
 	ev_len++;
 }
 
+static int trace_ram_all = 0;
+
 static int in_trace_range(uint32_t addr)
 {
+	if (trace_ram_all && addr >= 0x20000000 && addr < 0x20200000)
+		return 1;
 	if (addr >= TRACE_MMIO_LO && addr < TRACE_MMIO_HI)
 		return 1;
 	if (addr >= TRACE_SCB_LO && addr < TRACE_SCB_HI)
@@ -524,6 +528,7 @@ int main(int argc, char **argv)
 	}
 
 	trace_enabled = getenv("TRACE") != NULL;
+	trace_ram_all = getenv("TRACE_RAM_ALL") != NULL;
 
 	if (!strcmp(argv[1], "--compare")) {
 		if (argc < 5) {

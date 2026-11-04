@@ -26,9 +26,9 @@ all: $(BUILD_DIR)/ $(NVSS_OPEN_BIN) $(NVSS_OPEN_ASM) $(NVSS_OPEN_ELF)
 $(BUILD_DIR)/:
 	mkdir -p $@
 
-$(NVSS_OPEN_ELF): $(NVSS_OPEN_STARTUP) $(NVSS_OPEN_C) src/navassa_helpers.c src/navassa_init.c src/navassa_mmio.h $(NVSS_OPEN_LD) | $(BUILD_DIR)/
+$(NVSS_OPEN_ELF): $(NVSS_OPEN_STARTUP) $(NVSS_OPEN_C) src/navassa_helpers.c src/navassa_init.c src/navassa_mailbox.c src/navassa_mmio.h $(NVSS_OPEN_LD) | $(BUILD_DIR)/
 	arm-none-eabi-gcc -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -O2 -ffreestanding -nostartfiles -nostdlib \
-		-T $(NVSS_OPEN_LD) -o $@ $(NVSS_OPEN_STARTUP) $(NVSS_OPEN_C) src/navassa_helpers.c src/navassa_init.c
+		-T $(NVSS_OPEN_LD) -o $@ $(NVSS_OPEN_STARTUP) $(NVSS_OPEN_C) src/navassa_helpers.c src/navassa_init.c src/navassa_mailbox.c
 
 $(NVSS_OPEN_BIN): $(NVSS_OPEN_ELF)
 	arm-none-eabi-objcopy -O binary $< $@

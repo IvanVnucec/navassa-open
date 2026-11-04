@@ -27,7 +27,7 @@ Outputs:
 import re
 import sys
 from collections import defaultdict
-from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB
+from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_MCLASS
 
 BIN = sys.argv[1] if len(sys.argv) > 1 else "build/Navassa_EvaluationFw.bin"
 OUT_MAP = sys.argv[2] if len(sys.argv) > 2 else "tools/function_map.txt"
@@ -42,7 +42,7 @@ code = open(BIN, "rb").read()
 FW_END = FW_BASE + len(code)          # whole binary is mapped at 0x01000000
 RAM_END = RAM_BASE + (len(code) - RAM_OFF)   # RAM payload = tail of the binary
 
-md = Cs(CS_ARCH_ARM, CS_MODE_THUMB)
+md = Cs(CS_ARCH_ARM, CS_MODE_THUMB | CS_MODE_MCLASS)
 md.detail = False
 
 def read8(addr):

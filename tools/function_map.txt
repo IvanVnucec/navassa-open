@@ -1,5 +1,5 @@
 # function map generated from build/Navassa_EvaluationFw.bin (capstone recursive traversal)
-# 1774 discovered entry points, 1649 BL targets, 255 vector slots
+# 1799 discovered entry points, 1674 BL targets, 255 vector slots
 # addr       size   how              first insn                       name
 0x010004b8      22  BL x4              push {r3, r4, r5, lr}            
 0x010009f6      28  BL x4              push {r4, r5, lr}                
@@ -26,33 +26,33 @@
 0x01002694      46  BL x20             push {r7, lr}                    
 0x010026c2      46  BL x20             push {r7, lr}                    
 0x010026f0      42  BL x30             push {r3, r4, r5, r6, r7, lr}    
-0x010027d8       6  BL x7              strb r1, [r0]                    
-0x010027dc       2  BL x24             push {r4, lr}                    
+0x010027d8      28  BL x7              strb r1, [r0]                    
+0x010027dc      24  BL x28             push {r4, lr}                    
 0x010027f4       4  BL x11             ands r2, r1                      
-0x01002806       8  BL x7              push {r4, r5, lr}                
+0x01002806      16  BL x7              push {r4, r5, lr}                
 0x0100282e      74  BL x4              strb r1, [r0]                    
 0x01002836      66  BL x3              strb r1, [r0]                    
 0x01002842      54  BL x2              strb r1, [r0]                    
 0x01002852      38  BL x1              lsrs r2, r1, #8                  
 0x0100285a      30  BL x7              lsrs r2, r1, #0x10               
 0x01002866      18  BL x4              push {r4, lr}                    
-0x01002878     170  BL x1              ldr r1, [pc, #0x9c]              mainloop_store_const
+0x01002878     170  BL x1              ldr r1, [pc, #0x9c]              set_vtor_flash
 0x01002880     162  BL x36             movs r1, r0                      
 0x01002896     140  BL x37             movs r1, r0                      
 0x010028ac     118  BL x10             movs r1, r0                      
 0x010028ca      88  BL x5              movs r1, r0                      
 0x010028fc      38  BL x33             lsls r1, r1, #4                  
-0x01002938      18  BL x2              push {r4, lr}                    set_priority
+0x01002938      44  BL x2              push {r4, lr}                    set_priority
 0x010029e4      40  BL x4              uxtb r2, r2                      
-0x01002a40      54  BL x3              push {r4, lr}                    periph_pin_init
-0x01002a78      32  BL x89             push {r2, r3, r4, r5, r6, lr}    
+0x01002a40      54  BL x3              push {r4, lr}                    pin_init
+0x01002a78      32  BL x89             push {r2, r3, r4, r5, r6, lr}    boot_msg
 0x01002b24      26  BL x6              push {r4, lr}                    
 0x01002b56      14  BL x3              mov r3, r1                       
 0x01002b6e      14  BL x3              mov r3, r1                       
 0x01002b8a      16  BL x3              mov r3, r1                       
 0x01002c90      92  BL x28             push {r2, r3, r4, r5, r6, lr}    
 0x01002cec      46  BL x38             push.w {r2, r3, r4, r5, r6, r7, r8, lr} 
-0x01002db4       2  BL x880            push {r4, lr}                    periph_pin_init_helper
+0x01002db4      24  BL x891            push {r4, lr}                    pin_update
 0x01002df8       6  BL x9              ldr.w r2, [pc, #0x4f0]           
 0x01002dfe     146  BL x9              ldr.w r2, [pc, #0x4f0]           
 0x01002e90     134  BL x10             push {r4, r5, r6, lr}            
@@ -125,7 +125,7 @@
 0x01005e78      28  BL x13             push {r3, r4, r5, lr}            
 0x01005ed8      64  BL x3              push {r4, r5, r6, r7, lr}        
 0x01005fcc       6  BL x2              movs r0, #6                      set_priority_6_wrapper
-0x0100600c      40  BL x3              push {r7, lr}                    init_nvic_priorities
+0x0100600c      40  BL x3              push {r7, lr}                    init_sequence
 0x0100609a      24  BL x16             push {r4, lr}                    periph_init_d
 0x010060b2      26  BL x133            push {r4, lr}                    periph_init_e
 0x010060cc      18  BL x3              push {r4, lr}                    init_write_boot_byte
@@ -287,27 +287,28 @@
 0x0100a3dc       4  VEC[237]           movs r0, #1                      
 0x0100a3e0       4  VEC[238]           movs r0, #2                      
 0x0100a3e4       4  VEC[239]           movs r0, #3                      
-0x0100a4f4      64  BL x10             ldr r1, [pc, #0x290]             
-0x0100a506      46  BL x35             push {r4, r5, r6, lr}            
+0x0100a4f4      64  BL x12             ldr r1, [pc, #0x290]             
+0x0100a506      46  BL x38             push {r4, r5, r6, lr}            
 0x0100a54a     100  BL x2              ldr r2, [pc, #0x248]             
-0x0100a5ca      76  BL x2              push.w {r4, r5, r6, r7, r8, sb, sl, lr} 
+0x0100a5ca      92  BL x2              push.w {r4, r5, r6, r7, r8, sb, sl, lr} 
 0x0100a6cc     122  BL x3              push.w {r3, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0100a768      62  BL x5              ldr r2, [pc, #0x28]              
-0x0100a7dc       0  BL x9              ?                                
+0x0100a7dc      14  BL x9              mrs r0, ipsr                     
 0x0100a7e6       4  BL x9              b.w #0x101b348                   
 0x0100a7ea      12  BL x13             push {r4, lr}                    
 0x0100a84c      50  BL x9              movs r1, #0                      
-0x0100a854      42  BL x3              str r1, [r0]                     
+0x0100a854      42  BL x11             str r1, [r0]                     
 0x0100a86c      18  BL x16             push {r4, lr}                    
 0x0100a880      54  BL x6              push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0100aa26      32  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0100aa68     150  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0100ab1c     162  BL x16             push.w {r0, r1, r2, r3, r4, r5, r6, r7, r8, sb, sl, lr} 
 0x0100ab9c      34  BL x4              push {r4, r5, r6, lr}            
-0x0100ac4c      12  VEC[2]             push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
-0x0100aca0      50  BL x121            cbnz r0, #0x100acb2              systick_nvic_enable
-0x0100ad8c       0  BL x2              ?                                
-0x0100adea      30  BL x11             push {r3, r4, r5, lr}            
+0x0100ac14     190  BL x4              push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
+0x0100ac4c     134  VEC[2]             push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
+0x0100aca0      50  BL x142            cbnz r0, #0x100acb2              systick_nvic_enable
+0x0100ad8c      94  BL x6              mrs r0, basepri                  
+0x0100adea      30  BL x15             push {r3, r4, r5, lr}            
 0x0100ae0a      40  BL x18             push {r4, r5, r6, lr}            
 0x0100ae34     132  BL x36             push {r4, r5, r6, r7, lr}        mailbox_xfer
 0x0100aed4      18  BL x3              push {r7, lr}                    
@@ -356,8 +357,8 @@
 0x0100bb90      32  BL x2              push {r3, r4, r5, lr}            
 0x0100bbd8      38  BL x2              ldr r3, [pc, #0xf8]              
 0x0100bc76      18  BL x3              ldr r3, [pc, #0x5c]              
-0x0100bc88      48  BL x1              ldr r1, [pc, #0x48]              
-0x0100bc98      32  BL x3              push {r3, r4, r5, lr}            
+0x0100bc88      68  BL x1              ldr r1, [pc, #0x48]              
+0x0100bc98      52  BL x3              push {r3, r4, r5, lr}            
 0x0100bce8       6  BL x4              mov r0, r4                       
 0x0100c066      26  BL x2              push {r4, lr}                    
 0x0100c080     118  BL x2              push.w {r3, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
@@ -412,12 +413,12 @@
 0x0100f04a      60  BL x3              push {r2, r3, r4, r5, r6, lr}    
 0x0100f100      26  BL x40             push {r4, r5, r6, lr}            
 0x0100f12c      20  BL x3              push {r4, r5, r6, lr}            
-0x0100f180      20  BL x6              push {r3, r4, r5, r6, r7, lr}    
-0x0100f1b6      16  BL x3              push {r4, r5, r6, lr}            
+0x0100f180      32  BL x6              push {r3, r4, r5, r6, r7, lr}    
+0x0100f1b6      26  BL x3              push {r4, r5, r6, lr}            
 0x0100f228      30  BL x5              mov r4, r0                       
 0x0100f232      20  BL x10             push {r3, r4, r5, r6, r7, lr}    
-0x0100f25c      18  BL x1              ldrb.w r0, [r5, r7, lsl #2]      
-0x0100f26e      18  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
+0x0100f25c      18  BL x2              ldrb.w r0, [r5, r7, lsl #2]      
+0x0100f26e      28  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
 0x0100f2a8      48  BL x2              push {r4, lr}                    
 0x0100f2d8     152  BL x2              add.w r1, r0, #0x1c8             
 0x0100f2ec     132  BL x3              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
@@ -428,7 +429,7 @@
 0x0100f5a0      30  BL x7              ldrb r2, [r6]                    
 0x0100f5be     106  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0100f628     182  BL x6              push {r3, r4, r5, r6, r7, lr}    
-0x0100f6e0       6  BL x30             movs r2, #0                      
+0x0100f6e0       6  BL x36             movs r2, #0                      
 0x0100f6e6     124  BL x11             push {r3, r4, r5, r6, r7, lr}    
 0x0100f762      88  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0100f7e2      18  BL x3              push {r4, lr}                    
@@ -527,7 +528,7 @@
 0x0101182c      56  VEC[19]            push {r2, r3, r4, lr}            
 0x010119e6      16  VEC[20]            ldr r1, [pc, #0x9c]              
 0x01011c70      34  BL x2              ldr.w r0, [r3, r1, lsl #2]       
-0x0101204c     122  BL x11             cbz r2, #0x10120a8               
+0x0101204c     122  BL x12             cbz r2, #0x10120a8               
 0x0101206c      90  BL x38             subs r2, #0x10                   
 0x0101217e      26  BL x3              mov r4, r0                       
 0x01012198     162  BL x6              movs r1, #0                      
@@ -563,7 +564,7 @@
 0x01013aac      22  BL x5              push {r4, lr}                    
 0x01013b90      74  BL x5              push.w {r0, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x01013d72      38  BL x4              push {r4, lr}                    
-0x01013eb8      32  BL x3              push {r4, r5, r6, r7, lr}        
+0x01013eb8      32  BL x4              push {r4, r5, r6, r7, lr}        
 0x01013faa      44  BL x79             push {r4, lr}                    
 0x0101402a      46  BL x5              push {r4, lr}                    
 0x010140ac      48  BL x19             push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
@@ -669,7 +670,7 @@
 0x01016d20      46  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x01016d9c     132  BL x3              push {r4, r5, r6}                
 0x01016df4      44  BL x1              push {r3, r4, r5, lr}            
-0x01016e94       2  BL x6              push {r4, r5, lr}                
+0x01016e94      32  BL x6              push {r4, r5, lr}                
 0x01016eb4      14  BL x5              lsls r2, r0, #1                  
 0x01016ec2      10  BL x5              mvns r2, r0                      
 0x01016ee8      38  BL x3              push {r3, r4, r5, lr}            
@@ -690,7 +691,7 @@
 0x0101727c      18  BL x1              adr r3, #0x29c                   
 0x010172cc      16  BL x3              adr r3, #0x254                   
 0x010172dc      68  BL x1              push {r3, r4, r5, lr}            
-0x01017320      40  BL x1              nop                              
+0x01017320      40  BL x2              nop                              
 0x01017348      18  BL x1              adr r3, #0x1d0                   
 0x0101735a      26  BL x1              cmp r1, #1                       
 0x01017388      68  BL x1              adr r1, #0x190                   
@@ -774,7 +775,14 @@
 0x01019a84      92  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x01019ada       6  BL x6              mov r1, r8                       
 0x01019adc       4  BL x6              mov r0, sb                       
-0x01019ae0      14  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x01019ae0     266  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x01019be0      10  BL x10             movs r2, #0                      
+0x01019bea      10  BL x8              movs r2, #0                      
+0x01019bee       6  BL x6              mov r0, r8                       
+0x01019bf4      10  BL x10             movs r2, #2                      
+0x01019bfe      12  BL x9              movs r2, #2                      
+0x01019c0a      10  BL x5              movs r2, #1                      
+0x01019c14      12  BL x5              movs r2, #1                      
 0x01019c28     260  BL x2              ldr.w pc, [pc, #0]               
 0x01019c30     252  BL x14             ldr.w pc, [pc, #0]               
 0x01019c38     244  BL x18             ldr.w pc, [pc, #0]               
@@ -835,29 +843,31 @@
 0x0101ae80     182  VEC[65]            ldr r0, [pc, #0xb4]              
 0x0101ae96     160  VEC[66]            ldr r0, [pc, #0xa0]              
 0x0101aeac     138  VEC[77]            ldr r0, [pc, #0x88]              
-0x0101af6c       2  BL x10             push {r4, lr}                    
-0x0101af84     106  BL x9              push.w {r4, r5, r6, r7, r8, sb, lr} 
+0x0101af6c      24  BL x12             push {r4, lr}                    
+0x0101af84     106  BL x13             push.w {r4, r5, r6, r7, r8, sb, lr} 
 0x0101affa     238  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0101b07e     106  BL x1              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101b134      10  BL x1              subs r0, r1, #1                  
 0x0101b168       6  BL x7              mov r4, r0                       
-0x0101b20a      20  BL x13             ldr.w r1, [pc, #0x840]           
-0x0101b212      12  BL x6              str r0, [r1]                     
-0x0101b21e       0  BL x5              ?                                
-0x0101b222       2  BL x2              movs r0, #0x30                   
+0x0101b20a     142  BL x13             ldr.w r1, [pc, #0x840]           
+0x0101b212     134  BL x6              str r0, [r1]                     
+0x0101b21e     122  BL x5              mrs r8, basepri                  
+0x0101b222     118  BL x6              movs r0, #0x30                   
 0x0101b228     112  BL x3              dsb sy                           
 0x0101b232     102  BL x22             push {r4, lr}                    
-0x0101b2ac      56  BL x4              ldr.w r0, [pc, #0x794]           
-0x0101b2b8      44  BL x6              push {r3, r4, r5, r6, r7, lr}    
-0x0101b348      28  BL x12             ldr.w r0, [pc, #0x6f8]           
+0x0101b2ac      56  BL x6              ldr.w r0, [pc, #0x794]           
+0x0101b2b8      44  BL x12             push {r3, r4, r5, r6, r7, lr}    
+0x0101b348      28  BL x13             ldr.w r0, [pc, #0x6f8]           
 0x0101b364      70  BL x5              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0101b418      22  BL x4              ldr r0, [r5, #0x2c]              
 0x0101b426       8  BL x4              add.w r0, r5, #0x18              
-0x0101b492      26  BL x1              push {r3, r4, r5, lr}            
+0x0101b42e      16  BL x1              push {r3, r4, r5, lr}            
+0x0101b492      26  BL x3              push {r3, r4, r5, lr}            
 0x0101b4ac       8  BL x4              mov r4, r0                       
-0x0101b4ee      14  BL x3              ldr.w r0, [pc, #0x558]           
-0x0101b4f6       6  BL x2              uxtb r0, r0                      
-0x0101b524      40  BL x2              push {r4, r5, r6, lr}            
+0x0101b4ee      14  BL x8              ldr.w r0, [pc, #0x558]           
+0x0101b4f6       6  BL x4              uxtb r0, r0                      
+0x0101b4fc      40  BL x1              push {r4, r5, r6, lr}            
+0x0101b524      40  BL x3              push {r4, r5, r6, lr}            
 0x0101b566      16  BL x4              ldr r0, [r6, #0x78]              
 0x0101b568      14  BL x3              ldr r1, [r0, #0x2c]              
 0x0101b570       6  BL x10             adds r0, r5, #4                  
@@ -869,7 +879,7 @@
 0x0101b6a4      40  BL x2              mov r2, r0                       
 0x0101b6bc      16  BL x3              ldr.w r1, [pc, #0x384]           
 0x0101b6d8     134  BL x5              ldr.w r0, [pc, #0x36c]           
-0x0101b6e0     126  BL x4              ldr.w r1, [pc, #0x360]           
+0x0101b6e0     126  BL x6              ldr.w r1, [pc, #0x360]           
 0x0101b70e      80  BL x2              push {r4, r5, r6, lr}            
 0x0101b75e     170  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101b7d8      48  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
@@ -878,12 +888,15 @@
 0x0101b950      82  BL x5              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101b9c6      16  BL x1              ldr r0, [r7, #0x7c]              
 0x0101b9d8      64  BL x8              push.w {r4, r5, r6, r7, r8, lr}  
+0x0101ba9e      60  BL x4              ldr r1, [pc, #0x38]              
 0x0101baf4      18  VEC[62]            push {r7, lr}                    
 0x0101bb08     110  BL x17             uxtb r2, r2                      
-0x0101bb28      78  BL x2              push {r3, r4, r5, lr}            
+0x0101bb28      78  BL x6              push {r3, r4, r5, lr}            
 0x0101bb76     124  BL x4              push.w {r2, r3, r4, r5, r6, r7, r8, lr} 
 0x0101bbb8      58  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
-0x0101bbf6      56  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x0101bbf6      56  BL x7              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x0101bd1e     106  BL x6              push.w {r2, r3, r4, r5, r6, r7, r8, lr} 
+0x0101bd92      28  BL x5              push {r3, r4, r5, lr}            
 0x0101be78      78  BL x5              push {r2, r3, r4, lr}            
 0x0101beda      36  BL x10             push {r3, r4, r5, lr}            
 0x0101c238      20  BL x19             push {r3, r4, r5, lr}            
@@ -968,15 +981,15 @@
 0x0101db36      18  BL x2              ldr.w r2, [pc, #0x624]           
 0x0101db5c      30  BL x1              push {r3, r4, r5, lr}            
 0x0101db8c      12  BL x6              ldr.w r1, [pc, #0x5cc]           
-0x0101db98      88  BL x7              push.w {r3, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
+0x0101db98      88  BL x8              push.w {r3, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0101dc72      34  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0101dd14     122  BL x1              ldr.w r1, [pc, #0x448]           
 0x0101dd1e     112  BL x4              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101dda4      62  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0101ddea      12  BL x6              ldr.w r1, [pc, #0x370]           
-0x0101ddf6      78  BL x18             push {r3, r4, r5, lr}            
+0x0101ddf6      78  BL x19             push {r3, r4, r5, lr}            
 0x0101de6a      50  BL x10             push {r3, r4, r5, r6, r7, lr}    
-0x0101deb2      42  BL x8              push {r4, r5, r6, lr}            
+0x0101deb2      42  BL x9              push {r4, r5, r6, lr}            
 0x0101df90     228  BL x20             push.w {r4, r5, r6, r7, r8, lr}  
 0x0101e06e       6  BL x4              mov r0, r8                       
 0x0101e0fc      10  BL x2              ldr r1, [pc, #0x5c]              
@@ -995,18 +1008,19 @@
 0x0101ebe4      38  BL x1              push {r4, r5, r6, lr}            
 0x0101ec0a     216  BL x1              push.w {r0, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0101edc0     158  BL x12             vmov r0, s0                      
-0x0101ee64     272  BL x39             vmov r0, s0                      
-0x0101ee74     256  BL x1              ubfx r2, r0, #0x17, #8           
+0x0101ee64     382  BL x39             vmov r0, s0                      
+0x0101ee74     366  BL x1              ubfx r2, r0, #0x17, #8           
 0x0101f06a      14  BL x6              push {r4, r5, lr}                
 0x0101f078      20  BL x12             push {r4, r5, lr}                
 0x0101f08c      72  BL x2              mov.w r4, #0x660                 
 0x0101f0a0      52  BL x7              push {r4, r5, r6, r7, lr}        
-0x0101f13a      76  BL x7              push {r3, r4, r5, lr}            
+0x0101f13a      76  BL x15             push {r3, r4, r5, lr}            
 0x0101f1f0       8  BL x2              movs r1, #4                      
 0x0101f1f2       6  BL x3              mov r0, r4                       
 0x0101f1f8     118  BL x13             asrs r3, r1, #0x1f               
 0x0101f250      30  BL x157            push {r4, r5, r7, lr}            
 0x0101f3f4     202  BL x66             and r2, r1, #0x80000000          
+0x0101f45c      98  BL x7              push.w {r3, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0101f862      20  BL x7              strb.w r1, [sp, #4]              
 0x0101f86e       8  BL x4              add r1, sp, #0x88                
 0x0101f870       6  BL x2              movs r2, #0x28                   
@@ -1051,8 +1065,8 @@
 0x01022164      70  BL x8              push.w {r4, r5, r6, r7, r8, sb, sl, lr} 
 0x01022236       6  BL x4              movs r0, #0                      
 0x01022254      40  BL x10             push {r4, lr}                    
-0x0102229c     168  BL x3              bfi r2, r2, #8, #8               
-0x01022304      64  BL x20             push {r3, r4, r5, lr}            
+0x0102229c     196  BL x3              bfi r2, r2, #8, #8               
+0x01022304      92  BL x20             push {r3, r4, r5, lr}            
 0x01022360      30  BL x6              push {r4, lr}                    
 0x010223c4      46  BL x1              push.w {r3, r4, r5, r6, r7, sb, sl, lr} 
 0x01022446      66  BL x1              push {r4, r5, r6, lr}            
@@ -1106,9 +1120,10 @@
 0x01023ebe      40  BL x6              push {r4, r5, r6, lr}            
 0x01023ee6      40  BL x3              push {r4, r5, r6, lr}            
 0x01023f2c      38  BL x2              push {r3, r4, r5, lr}            
-0x01023f52       2  BL x30             push {r4, lr}                    
+0x01023f52      22  BL x30             push {r4, lr}                    
 0x01023f68      20  BL x2              push {r4, lr}                    
-0x01023f9c       2  BL x5              push {r4, lr}                    
+0x01023f9c      34  BL x5              push {r4, lr}                    
+0x01023fbe      34  BL x2              dsb sy                           
 0x01023fca      22  BL x2              mov r2, r0                       
 0x01024050      22  BL x9              mov r2, r0                       
 0x010240e8      36  BL x6              push {r4, lr}                    
@@ -1134,8 +1149,10 @@
 0x01024ce6      30  BL x1              movs r2, #0x38                   
 0x01024d04      20  BL x7              ldr.w r3, [pc, #0x73c]           
 0x01024d26      26  BL x1              mov r2, r0                       
-0x01024d4a     118  BL x3              push {r3, r4, r5, r6, r7, lr}    
+0x01024d4a     130  BL x3              push {r3, r4, r5, r6, r7, lr}    
+0x01024dcc      22  BL x2              nop                              
 0x01024de2       8  BL x2              movs r2, #1                      
+0x01024de4       6  BL x2              mov r1, r5                       
 0x01024de6       4  BL x2              mov r0, r4                       
 0x01024dea      34  BL x1              push {r4, lr}                    
 0x01024e0c      36  BL x1              push {r3, r4, r5, lr}            
@@ -1168,7 +1185,7 @@
 0x0102574c      14  BL x16             push {r4, r5, r6, r7, lr}        
 0x0102586a      82  BL x16             ldr r2, [pc, #0xf8]              
 0x010258bc      42  BL x2              push {r4, r6, r7, lr}            
-0x0102598c       2  BL x35             push {r4, lr}                    
+0x0102598c      24  BL x35             push {r4, lr}                    
 0x010259a4     140  BL x2              mov r3, r0                       
 0x010259b8     120  BL x1              ubfx r1, r0, #0x17, #8           
 0x010259ec      68  BL x3              vmov r1, s0                      
@@ -1238,21 +1255,27 @@
 0x0102aeaa      22  BL x2              sub sp, #8                       
 0x0102aec0      30  BL x2              push.w {r1, r2, r4, r5, r6, r7, r8, sb, sl, lr} 
 0x0102afce       8  BL x3              add r1, sp, #0xc                 
+0x0102afd0       6  BL x2              mov r0, sp                       
 0x0102afd6      24  BL x3              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0102b046      14  BL x4              cmp r7, #2                       
 0x0102b05a       8  BL x4              add.w r0, r6, #0x24              
 0x0102b062       8  BL x2              mov r5, r0                       
-0x0102b16c       6  BL x2              mov r0, sp                       
-0x0102b172      10  BL x3              ldrsb.w r1, [r0, #1]             
-0x0102b17c       0  BL x2              ?                                
-0x0102b186      18  BL x5              dsb sy                           
+0x0102b06a      24  BL x4              push.w {r0, r1, r2, r4, r5, r6, r7, r8, sb, lr} 
+0x0102b16c       6  BL x3              mov r0, sp                       
+0x0102b172      38  BL x5              ldrsb.w r1, [r0, #1]             
+0x0102b17c      28  BL x2              mrs r8, basepri                  
+0x0102b186      18  BL x8              dsb sy                           
 0x0102b190       8  BL x3              add.w r0, r5, #0x10              
 0x0102b28c      18  BL x3              add.w r0, r6, #0x44              
 0x0102b29a       4  BL x5              mov r0, r6                       
 0x0102b2a6      50  BL x2              ldr r0, [r6, #0x40]              
-0x0102b2a8      48  BL x2              subs r0, r0, #1                  
+0x0102b2a8      48  BL x5              subs r0, r0, #1                  
 0x0102b2b0      40  BL x4              push {r4, r5, r6, lr}            
+0x0102b304      40  BL x1              ldr r2, [r0, #0x40]              
+0x0102b32c      44  BL x4              push {r3, r4, r5, r6, r7, lr}    
+0x0102b38c      22  BL x3              push {r4, lr}                    
 0x0102b3a2      20  BL x1              push {r4, lr}                    
+0x0102b3cc      72  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0102b414     202  BL x2              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0102b506      88  BL x25             movs r1, #0x70                   
 0x0102b55e      20  BL x21             push {r4, lr}                    
@@ -1265,12 +1288,12 @@
 0x0102b6f6      14  BL x4              str r0, [r7]                     
 0x0102b7bc       8  VEC[245]           ldr r0, [pc, #0x10]              
 0x0102be68      38  BL x5              lsrs r1, r1, #1                  
-0x0102beaa      76  BL x2              push {r2, r3, r4, r5, r6, lr}    
-0x0102bf6c       2  BL x47             movs r0, #0x30                   
-0x0102bf96      18  BL x56             push {r4, lr}                    
-0x0102bfae      22  VEC[15]            push {r7, lr}                    
-0x0102bfca       2  BL x1              movs r0, #0x30                   
-0x0102bfdc       2  BL x7              push {r4, lr}                    
+0x0102beaa      76  BL x6              push {r2, r3, r4, r5, r6, lr}    
+0x0102bf6c      40  BL x53             movs r0, #0x30                   
+0x0102bf96      24  BL x66             push {r4, lr}                    
+0x0102bfae      28  VEC[15]            push {r7, lr}                    
+0x0102bfca      76  BL x1              movs r0, #0x30                   
+0x0102bfdc      58  BL x7              push {r4, lr}                    
 0x0102c03c      34  BL x5              ldr r0, [pc, #0x1c]              
 0x0102c064     276  BL x18             ldr.w pc, [pc, #0]               
 0x0102c06c     268  BL x18             ldr.w pc, [pc, #0]               
@@ -1280,7 +1303,7 @@
 0x0102c08c     236  BL x4              push {r3, r4, r5, lr}            
 0x0102c178      12  BL x15             movs r2, #1                      
 0x0102c194      40  BL x7              str r0, [sp]                     
-0x0102ccba       2  BL x8              push {r4, lr}                    
+0x0102ccba      24  BL x8              push {r4, lr}                    
 0x0102d692      24  BL x16             push {r4, lr}                    
 0x0102d748      86  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
 0x0102d79e     124  BL x4              push {r3, r4, r5, r6, r7, lr}    
@@ -1505,17 +1528,18 @@
 0x01034c88      12  BL x19             ldrb r7, [r6]                    
 0x01034c8c       8  BL x19             movs r1, #4                      
 0x01034c8e       6  BL x46             mov r0, r6                       
+0x01034ccc      70  BL x1              strb r1, [r0]                    
 0x01034ce4      46  BL x1              push {r3, r4, r5, r6, r7, lr}    
-0x01034d5c      10  BL x1              movs r2, #2                      
+0x01034d5c      10  BL x2              movs r2, #2                      
 0x01034d66      12  BL x1              add.w r4, r5, #0x1c              
 0x01034d72       8  BL x1              movs r2, #2                      
 0x01034d76       4  BL x4              mov r0, r4                       
 0x01034d7a      12  BL x2              movs r2, #3                      
-0x01034d86      14  BL x1              mov r4, r0                       
-0x01034d94     112  BL x1              ldr.w r1, [pc, #0x4ac]           
+0x01034d86      14  BL x2              mov r4, r0                       
+0x01034d94     112  BL x2              ldr.w r1, [pc, #0x4ac]           
 0x01034dba      74  BL x2              ldr.w r1, [pc, #0x48c]           
 0x01034e04      20  BL x1              ldr.w r3, [pc, #0x44c]           
-0x01034f50       6  BL x2              mov r0, r7                       
+0x01034f50       6  BL x4              mov r0, r7                       
 0x01035036       6  BL x8              mov r0, r5                       
 0x01035096     166  BL x9              push.w {r4, r5, r6, r7, r8, sb, lr} 
 0x0103513c      84  BL x4              ldr r1, [pc, #0x104]             
@@ -1551,9 +1575,9 @@
 0x010356ae      32  BL x2              push {r4, r5, r6, lr}            
 0x01035918      58  BL x53             mov.w r2, #-1                    
 0x01035932      32  BL x5              movs r1, #0                      
-0x01035938      26  BL x19             push {r4, lr}                    
-0x01035952      20  BL x3              push {r4, r5, lr}                
-0x01035984     642  BL x5              ldr r3, [r0, #4]                 
+0x01035938      26  BL x20             push {r4, lr}                    
+0x01035952      20  BL x7              push {r4, r5, lr}                
+0x01035984     642  BL x15             ldr r3, [r0, #4]                 
 0x010359ac     602  BL x19             ldr.w pc, [pc, #0]               
 0x010359b4     594  BL x10             ldr.w pc, [pc, #0]               
 0x010359bc     586  BL x11             ldr.w pc, [pc, #0]               
@@ -1566,20 +1590,21 @@
 0x01035bfa      12  BL x62             str r0, [r5]                     
 0x01035c06      12  BL x67             str r0, [r5]                     
 0x01035c14      20  BL x2              push {r4, r5, lr}                
-0x01035c28       4  BL x2              ldr r3, [pc, #0x48]              
+0x01035c28       4  BL x6              ldr r3, [pc, #0x48]              
 0x01035c2c      36  BL x2              ldr r3, [pc, #0x48]              
 0x01035c84     116  BL x6              lsrs r0, r0, #0x15               
 0x01035cac      76  BL x4              mov r1, r0                       
 0x01035cbc      60  BL x3              push {r3}                        
 0x01035db6       6  BL x2              movs r0, #6                      
 0x01035dbc       4  BL x2              b.w #0x1002964                   
+0x01035dc0       8  BL x8              nop                              
 0x01035dc8      58  BL x1              push {r3, r4, lr}                
 0x01035e02       6  BL x7              movs r0, #0x1f                   
 0x01035e08     146  VEC[47]            push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x01035f68      42  BL x5              uxtb r2, r2                      
 0x01035f92      12  BL x2              push {r7, lr}                    
 0x01035f9e      12  BL x4              push {r7, lr}                    
-0x01036000      20  BL x15             push {r2, r3, r4, r5, r6, lr}    
+0x01036000      58  BL x15             push {r2, r3, r4, r5, r6, lr}    
 0x010360a0      58  BL x19             push {r4, lr}                    
 0x0103619a      44  BL x13             ldrb r1, [r0]                    
 0x010361a8      30  BL x1              push {r4, r5, r6, lr}            
@@ -1680,9 +1705,9 @@
 0x0103a0e2      42  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0103a10c      28  BL x2              push.w {r0, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0103a2c8      44  BL x2              push {r4, lr}                    
-0x0103a3a0       0  VEC[14]            ?                                
-0x0103a3f8      10  VEC[11]            ldr r3, [pc, #0x48]              
-0x0103a414       6  BL x2              ldr r0, [pc, #0x30]              
+0x0103a3a0     166  VEC[14]            mrs r0, psp                      
+0x0103a3f8      78  VEC[11]            ldr r3, [pc, #0x48]              
+0x0103a414      50  BL x2              ldr r0, [pc, #0x30]              
 0x0103a434      18  BL x2              ldr.w r0, [pc, #0x14]            
 0x0103a4be      32  BL x1              push {r3, r4, r5, lr}            
 0x0103a4de       8  BL x1              lsls r2, r0, #4                  
@@ -1751,7 +1776,7 @@
 0x01044188      66  BL x3              ldr.w pc, [pc, #0]               ram_trampoline_b
 0x01044190      58  VEC[1]             ldr r2, [pc, #0x78]              reset_handler
 0x0104423c     108  BL x3              ldr r0, [pc, #0x10]              check_ram_words_equal
-0x01044254      84  BL x1              movw r1, #0xed88                 nvic_enable_helper
+0x01044254      84  BL x1              movw r1, #0xed88                 fpu_faults_enable
 0x01044298      16  BL x4              push {r4, lr}                    
 0x010442c0       4  BL x5              b.w #0x10442c4                   
 0x010442d0      16  BL x2              push {r7, lr}                    

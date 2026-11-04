@@ -177,3 +177,31 @@ This changes the reconstruction strategy in our favor:
       structs must be linker-placed at fixed addresses.
 - [ ] Step 4 — linker-script RAM contract placement
 - [ ] Side-quest — compiler fingerprinting
+
+## Step 2.7 progress: FreeRTOS kernel identified (session log)
+
+Exact byte-match of *compiled* kernel functions failed (0 hits across
+V10.3.1/V10.4.3/V10.4.6/V10.6.2/V11.1.0 at -O2/-Os, GCC 10.3) — the closed
+firmware was built with a different compiler (likely Keil). Pivot to
+structural identification:
+
+- capstone needs CS_MODE_MCLASS for ARMv7-M system insns (MRS/MSR) —
+  without it disassembly silently truncates at those functions (this
+  silently degraded earlier maps; func_map.py now fixed and regenerated:
+  1799 functions)
+- the FreeRTOS port handlers are HAND-WRITTEN ASM — compiler-independent:
+  - `mrs r0, psp; isb` byte-pattern found exactly once → xPortPendSVHandler
+    at 0x0103a3a0 (= vector slot 14)
+  - vector slot 11 = vPortSVCHandler (0x0103a3f8) — old-port structure
+    (mov r0,#0; msr basepri before bx r14)
+  - vector slot 15 = xPortSysTickHandler wrapper (0x0102bfae):
+    save-mask → xTaskIncrementTick (0x0101b364) → ICSR = 0x10000000
+  - vTaskSwitchContext at 0x0101b42e (called from PendSV)
+- version pinned: the `stmdb sp!, {r0, r3}` variant + old SVC tail match
+  the pre-2020-resync kernel tree; tree at that point = **FreeRTOS Kernel
+  V10.2.1**; configPRIO_BITS=4, configMAX_SYSCALL=0x30 (LIBRARY=3)
+- **pxCurrentTCB = 0x2001e564** (from the shared literal pool @0x0103a444)
+- kernel lives in FLASH (0x0101xxxx/0x0103xxxx); the 85KB RAM payload is
+  the application layer on top of it
+- ICSR fact correction: PENDSVSET = bit28 = 0x10000000 (not 0x80000000 —
+  that is NMIPENDSET; ADI wrappers do write 0x80000000 deliberately)

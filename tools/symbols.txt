@@ -32,3 +32,10 @@
 1044254 fpu_faults_enable
 1044278 scheduler_handoff
 1002a78 boot_msg
+# FreeRTOS kernel V10.2.1 (GCC ARM_CM4F port, old-layout tree) — confirmed
+# by byte/sequence match of the hand-written port assembly against source
+103a3a0 xPortPendSVHandler
+103a3f8 vPortSVCHandler
+102bfae xPortSysTickHandler_wrapper
+101b364 xTaskIncrementTick
+101b42e vTaskSwitchContext

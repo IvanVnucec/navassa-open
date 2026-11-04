@@ -49,3 +49,6 @@
 100aca0 nmi_signal_helper
 101b88c sched_state_op_A
 101b950 sched_state_op_B
+101b70e ulTaskNotifyTake
+101b75e xTaskNotifyWait
+101b6bc prvGetNextUnblockTime

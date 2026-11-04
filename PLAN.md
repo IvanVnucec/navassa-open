@@ -270,3 +270,18 @@ Confirmed by decode + tail-shape:
   ICSR write" primitive (writes 0x80000000 = NMIPENDSET when arg==0),
   used by ADI code as an event/notify mechanism
 - full xref table saved: tools/xrefs.txt
+
+## Naming progress (session 5)
+
+- TCB notification fields located: ulNotifiedValue @TCB+0x4c,
+  ucNotifyState @TCB+0x50 (strb #2 = taskWAITING_FOR_NOTIFICATION)
+- 0x0101b70e = ulTaskNotifyTake(xClearCountOnExit, xTicksToWait)
+- 0x0101b75e = xTaskNotifyWait(bitsToClearOnEntry, bitsToClearOnExit,
+  pulNotificationValue, ticksToWait) — 4 args + bic on entry ✓
+- 0x0101b6bc = prvGetNextUnblockTime (walks delayed-list head item value)
+- 0x0101b134 = boolean gate helper feeding nmi_signal (delayed-list empty
+  check inside tick processing)
+- xref method (tools/xrefs.txt) continues to pay off: callers of
+  basepri_raise (taskENTER_CRITICAL users) currently only the ADI
+  scheduler ops — queue.c cluster still unanchored (its critical
+  sections may inline differently)

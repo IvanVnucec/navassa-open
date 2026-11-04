@@ -390,3 +390,20 @@ per-channel state; clear per-channel counters; optional arm/timeout via
 0x100aa26; several completion paths (0x1031b7c, 0x1031a30); glue thunks
 0x1032478/86/8e/a6/b2 = constant-arg wrappers tail-calling 0x1006980 /
 0x102da94.
+
+## Round 13 — event→hardware pipeline complete
+
+0x0101d464 = event action executor: 3 flash tables of per-channel register
+bases (tableA 0x01044050: 0x46000e00/0x46001200/0x46000600/0x46000a00/
+0x46000800/0x46000c00; tableB/C shifted variants up to 0x46003a00); event
+type (tbb 0..3) selects a sequence of pin_update ops on base+0x174/0x175/
+0x12d/0x4a with masks {1,2,4,8,0x10,0x20}; glue thunks
+(0x101d448..0x101d54a, 0x101cb30) = constant-arg pin_update tail calls;
+0x01010262 = per-channel byte getter (table 0x2001fd10); 0x101d54a+ block
+uses 0x2001c230 (x49-ref block).
+
+FULL PIPELINE now mapped end-to-end:
+IRQ pin -> stream_int_handler (ack RMW @0x41000b0a)
+        -> dispatcher 0x1031e9e (validate/install-callback/clear-counters)
+        -> action executor 0x101d464 (per-channel pin_update sequences)
+        -> pin_update 0x1002db4 (VERIFIED in C) -> registers

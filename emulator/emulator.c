@@ -149,9 +149,20 @@ static bool hook_mem_write(uc_engine *uc, uc_mem_type type, uint64_t address,
 {
 	(void)type; (void)user_data;
 	uint32_t addr = (uint32_t)address;
+	if (addr == 0xe000ed04 && size == 4 && (uint32_t)value == 0x80000000) {
+		/* modeling decision: NMIPENDSET writes are suppressed. On real
+		 * HW the NMI vector is the default infinite-loop handler, so
+		 * pend-and-fire goes nowhere; in QEMU the exception storm
+		 * breaks execution (see Round 19). Log and swallow. */
+		fprintf(stderr, "[model] suppressed NMIPENDSET write (PC=0x%08x)\n", reg_pc(uc));
+		return true;
+	}
 	if (trace_enabled)
 		printf("  WRITE 0x%08x = 0x%0*x (%d bytes)\n",
 		       addr, size * 2, (uint32_t)value, size);
+	if (trace_ram_all && ((addr >= 0x01000000 && addr < 0x01050000) || addr < 0x50000))
+		fprintf(stderr, "[W-CODE] 0x%08x = 0x%0*x (PC=0x%08x)\n",
+			addr, size * 2, (uint32_t)value, reg_pc(uc));
 	if (in_trace_range(addr))
 		ev_push('W', addr, size, (uint32_t)value, reg_pc(uc));
 	return true;
@@ -161,6 +172,21 @@ static void hook_code(uc_engine *uc, uint64_t address, uint32_t size, void *user
 {
 	(void)uc; (void)size; (void)user_data;
 	printf("PC = 0x%08" PRIx64 "\n", address);
+}
+
+static void hook_insn_invalid(uc_engine *uc, void *user_data)
+{
+	(void)user_data;
+	uint32_t pc, sp, lr;
+	uc_reg_read(uc, UC_ARM_REG_PC, &pc);
+	uc_reg_read(uc, UC_ARM_REG_SP, &sp);
+	uc_reg_read(uc, UC_ARM_REG_LR, &lr);
+	uint8_t bytes[16] = {0};
+	uc_mem_read(uc, pc & ~1u, bytes, sizeof(bytes));
+	fprintf(stderr, "[!] INSN_INVALID at PC=0x%08x SP=0x%08x LR=0x%08x bytes=%02x %02x %02x %02x %02x %02x %02x %02x | %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		pc, sp, lr, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+		bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]);
+	uc_emu_stop(uc);
 }
 
 static void hook_mem_invalid(uc_engine *uc, uc_mem_type type, uint64_t address,
@@ -268,15 +294,23 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 	else if (trace_enabled)
 		printf("[*] Cortex-M4 CPU model enabled\n");
 
-	/* Memory map: flash, RAM, MMIO window, Cortex-M system control,
-	 * plus the harness return page. */
-	uc_mem_map(uc, firmware_base, align_page(fsize), UC_PROT_ALL);
-	/* Cortex-M boot alias: flash also mapped at 0x00000000 so that the
-	 * default VTOR=0 exception vector table works (the firmware pends
-	 * NMIs/SVCs before it ever sets VTOR — without the alias every
-	 * exception faults to PC=0). */
-	uc_mem_map(uc, 0x0, align_page(fsize), UC_PROT_ALL);
-	uc_mem_write(uc, 0x0, code, fsize);
+	/* Memory map: flash (extended window: the RLE decompressor expands
+	 * data far beyond the raw binary size inside the 0x01000000 region,
+	 * and it is writable there), RAM, MMIO window, Cortex-M system
+	 * control, plus the harness return page. */
+	size_t fw_map_size = align_page(fsize);
+	uc_mem_map(uc, firmware_base, fw_map_size, UC_PROT_ALL);
+	/* expansion region as a SEPARATE map (split maps dodge a translation
+	 * cache interaction seen with one big writable region) */
+	if (fw_map_size < 0x100000)
+		uc_mem_map(uc, firmware_base + fw_map_size, 0x100000 - fw_map_size, UC_PROT_ALL);
+	/* Cortex-M boot alias: ONLY the vector table region is mirrored at
+	 * 0x00000000 (VTOR=0 exception fetches need it before the firmware
+	 * sets VTOR). Mirroring the whole image caused translation-cache
+	 * collisions between the two maps (backward branches reported as
+	 * invalid instructions after code-region writes). */
+	uc_mem_map(uc, 0x0, 0x1000, UC_PROT_ALL);
+	uc_mem_write(uc, 0x0, code, 0x1000);
 	uc_mem_map(uc, RAM_BASE, RAM_SIZE, UC_PROT_ALL);
 	uc_mem_map(uc, MMIO_BASE, MMIO_SIZE, UC_PROT_READ | UC_PROT_WRITE);
 	uc_mem_map(uc, SCB_BASE, SCB_SIZE, UC_PROT_READ | UC_PROT_WRITE);
@@ -300,7 +334,8 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 		       BOOT_BYTE_ADDR, BOOT_BYTE_VAL);
 	}
 
-	uc_hook hh_code, hh_write, hh_read, hh_invalid;
+	uc_hook hh_code, hh_write, hh_read, hh_invalid, hh_insn;
+	uc_hook_add(uc, &hh_insn, UC_HOOK_INSN_INVALID, hook_insn_invalid, NULL, 1, 0);
 	uc_hook_add(uc, &hh_invalid, UC_HOOK_MEM_UNMAPPED | UC_HOOK_MEM_PROT,
 		    hook_mem_invalid, NULL, 1, 0);
 	uc_hook_add(uc, &hh_read, UC_HOOK_MEM_READ_AFTER, hook_mem_read, NULL, 1, 0);
@@ -389,7 +424,7 @@ static int do_boot_run(const char *bin, uint64_t firmware_base, uint64_t timeout
 	}
 
 	printf("[%s] boot run: SP=0x%08x PC=0x%08x\n", label, sp, reset_vec);
-	uc_err err = uc_emu_start(uc, reset_vec | 1, 0, timeout_ms * 1000, 0);
+	uc_err err = uc_emu_start(uc, reset_vec | 1, 0, 0, 0);	/* timeout via watchdog below (icount interference, see Round 19) */
 	if (err) {
 		printf("[%s] emulation stopped: %s\n", label, uc_strerror(err));
 		dump_regs(uc);

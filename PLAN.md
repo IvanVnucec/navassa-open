@@ -490,3 +490,33 @@ Seed used:
 SEED="0x200255cc=0x010441ad,0x200255f4=0x010441b5,0x2002558d=0x20,
 0x2002559d=0x20,0x20025596=0x0100,0x200255a6=0x0100,0x20025588=0x20,
 0x200255a9=0x20,0x200255ad=0x40"
+
+## Round 19 — the 0x0100298c unicorn fault (blocker, fully characterized)
+
+State: app init runs 33,713 events (giant init memsets at 0x2000e000+,
+0x20020000, kernel blocks); then the RLE decompressor phase (copy loop at
+0x0100296a region, source 0x010444dc..0x01046326 in flash, dest
+0x01047fe4+ — the RAM payload's flash-resident copy is COMPRESSED and
+expands in place beyond the binary end) stops with UC_ERR_INSN_INVALID at
+0x0100298c — a VALID backward BNE (bytes f9 d1 verified at runtime via
+UC_HOOK_INSN_INVALID).
+
+Eliminated hypotheses: flash alias size (full vs 4KB), map splitting,
+timeout/icount interference, NMI-pend storm (suppression made no
+difference — the write never happens in this flow), flash corruption
+(single write logged only), read-only flash (reverted — the SoC's
+0x01000000 region is genuinely writable: firmware decompresses into it).
+
+Minimal repro (real bytes + real regs, tools-needed): reproduces an
+exception storm from a trivial copy loop → points at unicorn 2.1.4's
+M-profile exception/TB internals, not our setup. pip caps at 2.1.4.
+
+NEXT (pick one):
+a) build unicorn from git master (post-2.1.4 M-profile fixes) and retry
+b) OFFLINE DECOMPRESSION: implement the RLE decoder in Python (algorithm
+   visible in the disassembly: token = byte; low2 bits = type; nibble
+   run-lengths with 0xF escape -> extended count; literal runs; byte-tail),
+   decode 0x010444dc.. offline, pre-load the expanded image via SEED/
+   mapping, bypass the buggy path entirely. RECOMMENDED — no toolchain
+   risk, and the decompressed payload becomes a first-class artifact for
+   the RAM-payload translation campaign.

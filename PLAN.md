@@ -369,3 +369,24 @@ The 0x102axxx-0x102b3xx "queue.c cluster" is NOT FreeRTOS queue.c:
   +0x26 enable u8
 - next: full decode of 0x1031e9e body + 0x101d464; then map the event
   objects' producers (who builds them — the RMW status functions)
+
+## Round 12 findings — dispatcher (0x01031e9e) fully characterized
+
+Event object (arg0) layout: +0 event-id u8, +1 flags u8, +2 channel u8,
++4 expected-stream u32, +0x24 byte (mode?), +0x26 enable u8. Callers pass
+5+ stack args ([sp+0x30..0x40] read = results/counters).
+
+Data blocks used by the dispatcher:
+- 0x2000bae8  dispatch table [stream*8 + type*4] -> handler obj (+0x10 byte)
+- 0x200438d4  channel lookup table (byte-indexed)
+- 0x2001d918  per-channel state array (fields +0x44 = installed handler,
+  +0x90/+0xa0 = 8-byte ctx copies) — x36-ref block
+- 0x20009ed4  object table; [obj+0x30] = callback fn ptr (installed)
+- 0x20019d78 / 0x2001fb60  per-channel counters (cleared on events)
+- 0x2000bb10  secondary dispatch table ([stream*8+type*4] -> +0x1c)
+
+Behavior: validate stream vs [fp+4]; select handler; install callback into
+per-channel state; clear per-channel counters; optional arm/timeout via
+0x100aa26; several completion paths (0x1031b7c, 0x1031a30); glue thunks
+0x1032478/86/8e/a6/b2 = constant-arg wrappers tail-calling 0x1006980 /
+0x102da94.

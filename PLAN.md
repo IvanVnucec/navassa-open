@@ -250,3 +250,23 @@ application code lives in FLASH too (top referenced RAM addresses:
 Method note: literal-scan + containing-function attribution + capstone
 (CS_MODE_MCLASS!) offset extraction works well; reuse tools/fros_match.py
 ideas for the ADI module hunt.
+
+## Naming progress (session 4)
+
+Confirmed by decode + tail-shape:
+- 0x0101b9d8 = prvAddCurrentTaskToDelayedList (portMAX_DELAY cmn test,
+  delayed/overflow list select, xNextTaskUnblockTime = min(...) tail)
+- 0x01035938 = vListInsert, 0x01035984 = vListRemove,
+  0x01035952 = second vListInsert specialization
+- 0x0102bfdc = vPortValidateInterruptPriority (IPSR → IPR table
+  0xe000e400 pre-adjusted via 0xe000e3f0, ucMaxSysCallPriority byte at
+  0x2000b650, AIRCR PRIGROUP validation)
+- 0x0101b21e = BASEPRI raise to 0x30 (confirms configMAX_SYSCALL=0x30 a
+  second time)
+- 0x0101b88c/0x0101b950 = ADI scheduler state-machine functions (read
+  xTickCount, byte state at A[0x50]=2, tbb dispatch 0..4, delayed-list
+  insert, ready-bitmap set, xYieldPending) — scheduler.c module
+- 0x0100aca0 reframed: 46 callers app-wide — the "signal host via
+  ICSR write" primitive (writes 0x80000000 = NMIPENDSET when arg==0),
+  used by ADI code as an event/notify mechanism
+- full xref table saved: tools/xrefs.txt

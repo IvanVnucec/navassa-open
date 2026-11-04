@@ -306,7 +306,7 @@
 0x0100ab9c      34  BL x4              push {r4, r5, r6, lr}            
 0x0100ac14     190  BL x4              push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0100ac4c     134  VEC[2]             push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr} 
-0x0100aca0      50  BL x142            cbnz r0, #0x100acb2              systick_nvic_enable
+0x0100aca0      50  BL x142            cbnz r0, #0x100acb2              nmi_signal_helper
 0x0100ad8c      94  BL x6              mrs r0, basepri                  
 0x0100adea      30  BL x15             push {r3, r4, r5, lr}            
 0x0100ae0a      40  BL x18             push {r4, r5, r6, lr}            
@@ -851,17 +851,17 @@
 0x0101b168       6  BL x7              mov r4, r0                       
 0x0101b20a     142  BL x13             ldr.w r1, [pc, #0x840]           
 0x0101b212     134  BL x6              str r0, [r1]                     
-0x0101b21e     122  BL x5              mrs r8, basepri                  
+0x0101b21e     122  BL x5              mrs r8, basepri                  basepri_raise_0x30
 0x0101b222     118  BL x6              movs r0, #0x30                   
 0x0101b228     112  BL x3              dsb sy                           
 0x0101b232     102  BL x22             push {r4, lr}                    
 0x0101b2ac      56  BL x6              ldr.w r0, [pc, #0x794]           
 0x0101b2b8      44  BL x12             push {r3, r4, r5, r6, r7, lr}    
 0x0101b348      28  BL x13             ldr.w r0, [pc, #0x6f8]           
-0x0101b364      70  BL x5              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x0101b364      70  BL x5              push.w {r3, r4, r5, r6, r7, r8, sb, lr} xTaskIncrementTick
 0x0101b418      22  BL x4              ldr r0, [r5, #0x2c]              
 0x0101b426       8  BL x4              add.w r0, r5, #0x18              
-0x0101b42e      16  BL x1              push {r3, r4, r5, lr}            
+0x0101b42e      16  BL x1              push {r3, r4, r5, lr}            vTaskSwitchContext
 0x0101b492      26  BL x3              push {r3, r4, r5, lr}            
 0x0101b4ac       8  BL x4              mov r4, r0                       
 0x0101b4ee      14  BL x8              ldr.w r0, [pc, #0x558]           
@@ -887,7 +887,7 @@
 0x0101b88c      52  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0101b950      82  BL x5              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101b9c6      16  BL x1              ldr r0, [r7, #0x7c]              
-0x0101b9d8      64  BL x8              push.w {r4, r5, r6, r7, r8, lr}  
+0x0101b9d8      64  BL x8              push.w {r4, r5, r6, r7, r8, lr}  prvAddCurrentTaskToDelayedList
 0x0101ba9e      60  BL x4              ldr r1, [pc, #0x38]              
 0x0101baf4      18  VEC[62]            push {r7, lr}                    
 0x0101bb08     110  BL x17             uxtb r2, r2                      
@@ -1291,9 +1291,9 @@
 0x0102beaa      76  BL x6              push {r2, r3, r4, r5, r6, lr}    
 0x0102bf6c      40  BL x53             movs r0, #0x30                   
 0x0102bf96      24  BL x66             push {r4, lr}                    
-0x0102bfae      28  VEC[15]            push {r7, lr}                    
+0x0102bfae      28  VEC[15]            push {r7, lr}                    xPortSysTickHandler_wrapper
 0x0102bfca      76  BL x1              movs r0, #0x30                   
-0x0102bfdc      58  BL x7              push {r4, lr}                    
+0x0102bfdc      58  BL x7              push {r4, lr}                    vPortValidateInterruptPriority
 0x0102c03c      34  BL x5              ldr r0, [pc, #0x1c]              
 0x0102c064     276  BL x18             ldr.w pc, [pc, #0]               
 0x0102c06c     268  BL x18             ldr.w pc, [pc, #0]               
@@ -1575,9 +1575,9 @@
 0x010356ae      32  BL x2              push {r4, r5, r6, lr}            
 0x01035918      58  BL x53             mov.w r2, #-1                    
 0x01035932      32  BL x5              movs r1, #0                      
-0x01035938      26  BL x20             push {r4, lr}                    
-0x01035952      20  BL x7              push {r4, r5, lr}                
-0x01035984     642  BL x15             ldr r3, [r0, #4]                 
+0x01035938      26  BL x20             push {r4, lr}                    vListInsert
+0x01035952      20  BL x7              push {r4, r5, lr}                vListInsertGeneric
+0x01035984     642  BL x15             ldr r3, [r0, #4]                 vListRemove
 0x010359ac     602  BL x19             ldr.w pc, [pc, #0]               
 0x010359b4     594  BL x10             ldr.w pc, [pc, #0]               
 0x010359bc     586  BL x11             ldr.w pc, [pc, #0]               
@@ -1705,8 +1705,8 @@
 0x0103a0e2      42  BL x1              push {r3, r4, r5, r6, r7, lr}    
 0x0103a10c      28  BL x2              push.w {r0, r4, r5, r6, r7, r8, sb, sl, fp, lr} 
 0x0103a2c8      44  BL x2              push {r4, lr}                    
-0x0103a3a0     166  VEC[14]            mrs r0, psp                      
-0x0103a3f8      78  VEC[11]            ldr r3, [pc, #0x48]              
+0x0103a3a0     166  VEC[14]            mrs r0, psp                      xPortPendSVHandler
+0x0103a3f8      78  VEC[11]            ldr r3, [pc, #0x48]              vPortSVCHandler
 0x0103a414      50  BL x2              ldr r0, [pc, #0x30]              
 0x0103a434      18  BL x2              ldr.w r0, [pc, #0x14]            
 0x0103a4be      32  BL x1              push {r3, r4, r5, lr}            

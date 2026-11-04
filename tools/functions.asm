@@ -6108,7 +6108,7 @@
 0x0100ac9a:  pop.w    {r4, r5, r6, r7, r8, sb, sl, fp, lr}
 0x0100ac9e:  bx       lr
 
-; ==== systick_nvic_enable @ 0x0100aca0 (size ~50) ====
+; ==== nmi_signal_helper @ 0x0100aca0 (size ~50) ====
 0x0100aca0:  cbnz     r0, #0x100acb2
 0x0100aca2:  ldr      r1, [pc, #0x28]
 0x0100aca4:  mov.w    r0, #-0x80000000
@@ -16026,7 +16026,7 @@
 0x0101b218:  isb      sy
 0x0101b21c:  bx       lr
 
-; ==== sub_0101b21e @ 0x0101b21e (size ~4) ====
+; ==== basepri_raise_0x30 @ 0x0101b21e (size ~4) ====
 0x0101b21e:  mrs      r8, basepri
 
 ; ==== sub_0101b222 @ 0x0101b222 (size ~6) ====
@@ -16121,7 +16121,7 @@
 0x0101b360:  ldr      r0, [r4, #0x68]
 0x0101b362:  pop      {r4, pc}
 
-; ==== sub_0101b364 @ 0x0101b364 (size ~70) ====
+; ==== xTaskIncrementTick @ 0x0101b364 (size ~70) ====
 0x0101b364:  push.w   {r3, r4, r5, r6, r7, r8, sb, lr}
 0x0101b368:  ldr.w    r7, [pc, #0x6d8]
 0x0101b36c:  ldr      r0, [r7, #0x6c]
@@ -16163,7 +16163,7 @@
 0x0101b426:  add.w    r0, r5, #0x18
 0x0101b42a:  b.w      #0x1035984
 
-; ==== sub_0101b42e @ 0x0101b42e (size ~16) ====
+; ==== vTaskSwitchContext @ 0x0101b42e (size ~16) ====
 0x0101b42e:  push     {r3, r4, r5, lr}
 0x0101b430:  ldr.w    r1, [pc, #0x518]
 0x0101b434:  ldr      r0, [r1, #0x6c]
@@ -16565,7 +16565,7 @@
 0x0101b9d2:  movs     r0, r0
 0x0101b9d4:  b        #0x101b3b0
 
-; ==== sub_0101b9d8 @ 0x0101b9d8 (size ~64) ====
+; ==== prvAddCurrentTaskToDelayedList @ 0x0101b9d8 (size ~64) ====
 0x0101b9d8:  push.w   {r4, r5, r6, r7, r8, lr}
 0x0101b9dc:  ldr      r5, [pc, #0x64]
 0x0101b9de:  ldr      r7, [pc, #0x68]
@@ -24006,7 +24006,7 @@
 0x0102bfa8:  msr      basepri, r0
 0x0102bfac:  pop      {r4, pc}
 
-; ==== sub_0102bfae @ 0x0102bfae (size ~28) ====
+; ==== xPortSysTickHandler_wrapper @ 0x0102bfae (size ~28) ====
 0x0102bfae:  push     {r7, lr}
 0x0102bfb0:  bl       #0x102bfca
 0x0102bfb4:  bl       #0x101b364
@@ -24026,7 +24026,7 @@
 0x0102bfd8:  bx       lr
 0x0102bfda:  movs     r0, r0
 
-; ==== sub_0102bfdc @ 0x0102bfdc (size ~58) ====
+; ==== vPortValidateInterruptPriority @ 0x0102bfdc (size ~58) ====
 0x0102bfdc:  push     {r4, lr}
 0x0102bfde:  mrs      r0, ipsr
 0x0102bfe2:  cmp      r0, #0x10
@@ -29476,7 +29476,7 @@
 0x01035934:  str      r1, [r0, #0x10]
 0x01035936:  bx       lr
 
-; ==== sub_01035938 @ 0x01035938 (size ~26) ====
+; ==== vListInsert @ 0x01035938 (size ~26) ====
 0x01035938:  push     {r4, lr}
 0x0103593a:  ldr      r2, [r0, #4]
 0x0103593c:  str      r2, [r1, #4]
@@ -29491,7 +29491,7 @@
 0x0103594e:  str      r1, [r0]
 0x01035950:  pop      {r4, pc}
 
-; ==== sub_01035952 @ 0x01035952 (size ~20) ====
+; ==== vListInsertGeneric @ 0x01035952 (size ~20) ====
 0x01035952:  push     {r4, r5, lr}
 0x01035954:  ldr      r2, [r1]
 0x01035956:  cmn.w    r2, #1
@@ -29501,7 +29501,7 @@
 0x01035960:  add.w    r3, r0, #8
 0x01035964:  b        #0x1035968
 
-; ==== sub_01035984 @ 0x01035984 (size ~40) ====
+; ==== vListRemove @ 0x01035984 (size ~40) ====
 0x01035984:  ldr      r3, [r0, #4]
 0x01035986:  ldr      r1, [r0, #0x10]
 0x01035988:  ldr      r2, [r0, #8]
@@ -31943,7 +31943,7 @@
 0x0103a2ee:  pop.w    {r4, lr}
 0x0103a2f2:  b        #0x103a398
 
-; ==== sub_0103a3a0 @ 0x0103a3a0 (size ~88) ====
+; ==== xPortPendSVHandler @ 0x0103a3a0 (size ~88) ====
 0x0103a3a0:  mrs      r0, psp
 0x0103a3a4:  isb      sy
 0x0103a3a8:  ldr      r3, [pc, #0x98]
@@ -31972,7 +31972,7 @@
 0x0103a3f2:  isb      sy
 0x0103a3f6:  bx       lr
 
-; ==== sub_0103a3f8 @ 0x0103a3f8 (size ~28) ====
+; ==== vPortSVCHandler @ 0x0103a3f8 (size ~28) ====
 0x0103a3f8:  ldr      r3, [pc, #0x48]
 0x0103a3fa:  ldr      r1, [r3]
 0x0103a3fc:  ldr      r0, [r1]

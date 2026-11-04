@@ -1,0 +1,11 @@
+# call-site cross references (bl/b.w targets -> callers), from functions.asm
+100aca0 (nmi_signal_helper): 46 callers — app-wide "signal host via NMI-pend" primitive
+  1002938 10040ce 100b26a 100f100 100f12c 100f180 100f1b6 100f232 100f25c 100f26e 1016536 1019fe4 101af84 101affa ...
+101b364 (xTaskIncrementTick): 1 caller — 102bfae (xPortSysTickHandler wrapper)
+101b42e (vTaskSwitchContext): 1 caller — 103a3a0 (xPortPendSVHandler)
+1035938 (vListInsert): 101b4fc 101b576 101b9d8
+1035984 (vListRemove): 101b426 101b570 101b576 101b9d8 101bd1e
+1035952 (vListInsertGeneric): 101b492 101bd1e
+100ad8c (basepri_cap): 100ae34 (mailbox_xfer) + self
+1002938 (prio_yield_hook): 1005fcc 10232b8 1024d4a 1035db6
+1002964 (basepri_set): 10232be 1035dbc

@@ -39,3 +39,13 @@
 102bfae xPortSysTickHandler_wrapper
 101b364 xTaskIncrementTick
 101b42e vTaskSwitchContext
+# identified by structural role (V10.2.1 semantics)
+1035938 vListInsert
+1035984 vListRemove
+1035952 vListInsertGeneric
+101b9d8 prvAddCurrentTaskToDelayedList
+102bfdc vPortValidateInterruptPriority
+101b21e basepri_raise_0x30
+100aca0 nmi_signal_helper
+101b88c sched_state_op_A
+101b950 sched_state_op_B

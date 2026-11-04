@@ -331,3 +331,15 @@ The 0x102axxx-0x102b3xx "queue.c cluster" is NOT FreeRTOS queue.c:
 - queue.c may not be linked at all; FreeRTOS queue usage unconfirmed
 - configUSE_QUEUE_SETS / generic-queue paths: TBD
 - tools/symbols.txt relabeled accordingly
+
+## Round 9 findings
+
+- 0x20000404 = the central driver/device context (115 literal refs from
+  89 functions); accessed via getter thunks clustered around 0x01044314
+  (each thunk returns &ctx->field with a precomputed literal)
+- top context users: 0x0104138c (x8: status-flag RMW functions with
+  0xfff7 halfword masks — monitor/status module), 0x0103df28 (x5),
+  0x01007bf6, 0x01020e90, 0x010373a8
+- this is the entry point for the ADI app translation: identify the
+  context struct layout from its most-referenced fields, then work
+  outward through the 89 users

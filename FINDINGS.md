@@ -17,6 +17,17 @@ been removed; only observed facts are kept.
   BASEPRI, `cpsid i`, `ubfx`, `pkhbt`, `itt`/`ite`, `ldmia.w`/`stmdb`, `b.w`); the
   vector table follows the Cortex-M layout (SP at offset 0, reset at offset 4, each
   entry 4 bytes).
+- **RTOS evidence (strong):** FreeRTOS-style patterns — `portYIELD()` write of
+  0x80000000 (PENDSVSET) to ICSR (0xE000ED04); BASEPRI interrupt masking; SHCSR
+  fault enables (0xF00000 → 0xE000ED88); FPU lazy stacking (`vpush {d8}` in
+  tasks → ARM_CM4F port). Embedded strings: source file names (ctrl_task.c,
+  scheduler.c, cal_task_core.c, monitor_rssi.c, monitor_drv.c, gpt.c, dma.c,
+  fh.c, mcs.c, streams_interrupts.c, lb_pll_nco_mgr.c, tracking_cals.c,
+  spimaster.c, main.c, warmboot.c, cstartup_m.c) and RTOS object names
+  (TempTimer, HealthMonitorTimer, IDLE — the FreeRTOS idle task default name).
+  The kernel itself is open source — see PLAN.md for the byte-match strategy.
+- **Semihosting:** `bkpt #0xAB` sequences at 0x010442d0/0x010442e4 (debug
+  console support compiled in).
 - **Unicorn mode:** `UC_ARCH_ARM | UC_MODE_THUMB | UC_MODE_MCLASS` with the CPU model
   explicitly set to `UC_CPU_ARM_CORTEX_M4`.
 
@@ -80,19 +91,19 @@ external CPU pre-seeding RAM before releasing the M4 core at every power reset.
 
 | Address    | Purpose |
 |------------|---------|
-| 0x01002938 | `set_priority(r0)` — CMSIS NVIC priority masking. Saves PRIMASK, disables interrupts, sets BASEPRI, restores PRIMASK. |
-| 0x01002964 | `restore_priority(r0)` — writes r0 to BASEPRI, returns. |
-| 0x01005fcc | `set_priority(6)` — wrapper: calls set_priority with arg 6. |
-| 0x01005fd2 | `restore_priority` wrapper. |
-| 0x010060fe | `get_periph_ptr(r0)` — sets r4 = r0, returns, used as common prologue. |
-| 0x010060de | `read_periph_reg(r1)` — loads r1 from literal pool, reads [r1] into r2, returns r2. |
-| 0x0100616e | Init function (selects a field via `pkhbt`). |
+| 0x01002938 | `prio_yield_hook(prio)` — x = (prio << 4) & 0xFF; if x != 0: no-op; if x == 0: ICSR = 0x80000000 (PendSV yield) and BASEPRI = 0. All observed call sites pass 6 (no-op). |
+| 0x01002964 | `basepri_set(r0)` — BASEPRI = r0. |
+| 0x01005fcc | wrapper: prio_yield_hook(6). |
+| 0x01005fd2 | wrapper: basepri_set. |
+| 0x010060fe | `stash_ptr(r0)` — r4 = r0, then prio_yield_hook(6) (no-op). |
+| 0x010060de | `read_periph_reg()` — returns *0x49000014. |
+| 0x0100616e | Init function (bitfield via `pkhbt`). |
 | 0x01006164 | Init function. |
 | 0x0100617e | Init function. |
 | 0x0100609a | Init function (2-bit field). |
-| 0x010060b2 | Init function (4-bit field). |
+| 0x010060b2 | Init function (4-bit field: reg = (reg & ~0xF0) \| ((id << 4) & 0xF0)). |
 | 0x010060e4 | Init function (4-bit field, different alignment). |
-| 0x0100aca0 | SysTick/NVIC enable — writes 0x80000000 to a control register. |
+| 0x0100aca0 | `pendsv_yield(r0)` — if r0 == 0: ICSR = 0x80000000 (PENDSVSET). Else no-op. |
 | 0x01002a40 | Peripheral/pin init — calls 0x01002db4. |
 | 0x01044180 | `ldr.w pc, [pc]` — trampoline, loads target from literal pool. |
 | 0x01044188 | Same pattern, different literal. |

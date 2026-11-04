@@ -109,12 +109,46 @@ recompilation (impossible without the original source), but because:
 First probe: `strings` on the binary for toolchain strings, plus idiom matching
 in `build/Navassa_EvaluationFw.asm`.
 
+## FreeRTOS strategy (user-reported, confirmed by evidence)
+
+The firmware is (very likely) built on **FreeRTOS**. Evidence:
+
+- `portYIELD()` idiom: write of 0x80000000 (PENDSVSET) to ICSR 0xE000ED04
+  (our `prio_yield_hook`/`pendsv_yield` helpers do exactly this on the
+  x == 0 path)
+- BASEPRI interrupt masking (ARM_CM4/CM4F port style)
+- SHCSR fault enables (0xF00000 → 0xE000ED88) — port startup code
+- FPU context: `vpush {d8}` prologues → tasks use the FPU → **CM4F port**
+- Strings: `TempTimer`, `HealthMonitorTimer` (software-timer names),
+  `IDLE` (default idle task name), plus ADI module file names
+  (ctrl_task.c, scheduler.c, cal_task_core.c, monitor_rssi.c,
+  monitor_drv.c, gpt.c, dma.c, fh.c, mcs.c, streams_interrupts.c,
+  lb_pll_nco_mgr.c, tracking_cals.c, spimaster.c, warmboot.c)
+
+This changes the reconstruction strategy in our favor:
+
+1. **Kernel = free translations.** FreeRTOS is open source. Identify the
+   kernel version (queue/TCB/list structures, port constants), rebuild it
+   for CM4F with the same toolchain and byte-match functions against the
+   binary — matched functions are taken from source, not translated.
+2. **Translation targets = the ADI modules** named in the strings
+   (scheduler, cal tasks, monitors, SPI master, streams interrupts...).
+   These implement the radio control logic and are the real work.
+3. RTOS structure explains the boot flow: the trampolines into the RAM
+   payload are the RTOS/app entry; the "main loop" at 0x10441ca is the
+   pre-scheduler boot path (`mainloop_store_const` writes a flag, then
+   more init runs).
+4. The `bkpt #0xAB` semihosting sequences (0x010442d0/0x010442e4) are
+   debug console support — stub or keep.
+
 ## Status
 
 - [x] Step 0 — differential tracer + harness mode
 - [x] Step 1 — function map (tools/func_map.py: 1774 functions, 1649 BL targets, 255 vector slots; tools/functions.asm = clean per-function disassembly; tools/symbols.txt = name registry)
 - [ ] Step 2.1 — startup/vector table *(done: `src/navassa_open_startup.s`)*
-- [ ] Step 2.2 — leaf helpers
+- [x] Step 2.2 — leaf helpers (set_priority, restore_priority, get_periph_ptr,
+      read_periph_reg, init_write_boot_byte, periph_init_a..f — all 9 verified
+      against the closed firmware with tools/tracecmp.sh)
 - [ ] Step 2.3 — reset handler → `main()`
 - [ ] Step 2.4 — init sequence
 - [ ] Step 2.5 — main loop / scheduler

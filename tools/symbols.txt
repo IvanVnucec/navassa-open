@@ -71,3 +71,11 @@
 102b2a8 adi_is_empty_B
 102bf6c task_enter_critical
 # port statics: 0x2000b650 = ucMaxSysCallPriority(+0), uxCriticalNesting(+4)
+# app layer (streams_interrupts.c territory)
+1041332 stream_int_handler_A
+104138c stream_int_handler_B
+1031e9e stream_event_dispatcher
+# app data blocks
+# 0x2001ccf8 = stream/channel manager ( +8/+0xc instance ptrs, +0x77c global enable)
+# 0x2000bae8 = channel dispatch table (8-byte stride entries)
+# 0x20000404 = central driver context (89 users)

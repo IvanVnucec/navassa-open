@@ -343,3 +343,17 @@ The 0x102axxx-0x102b3xx "queue.c cluster" is NOT FreeRTOS queue.c:
 - this is the entry point for the ADI app translation: identify the
   context struct layout from its most-referenced fields, then work
   outward through the 89 users
+
+## Round 10 findings
+
+- 0x01041332/0x0104138c = per-stream interrupt handlers (streams_interrupts.c):
+  read GPIO-ish status byte (0x46000f78 / 0x46001378), clear-ack RMW on
+  halfword register 0x41000b0a (masks 0xfff7 / 0xf7ff — one bit differs per
+  channel), check enable conditions ([ctx+0x2d], global byte at
+  0x2001ccf8+0x77c), then dispatch via table 0x2000bae8 (8-byte stride,
+  indexed by [subctx+8] and [subctx+2]) into 0x1031e9e with 5 stack args
+- data blocks identified:
+  - 0x2001ccf8 = stream/channel manager (x46 refs)
+  - 0x2000bae8 = channel dispatch table
+  - 0x41000000 region = stream/data registers (halfword RMW ack bits)
+- next: decode dispatcher 0x1031e9e, then the ctx struct field map

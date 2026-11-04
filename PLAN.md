@@ -357,3 +357,15 @@ The 0x102axxx-0x102b3xx "queue.c cluster" is NOT FreeRTOS queue.c:
   - 0x2000bae8 = channel dispatch table
   - 0x41000000 region = stream/data registers (halfword RMW ack bits)
 - next: decode dispatcher 0x1031e9e, then the ctx struct field map
+
+## Round 11 findings
+
+- dispatcher 0x01031e9e head decoded: event routing — arg0 = event object
+  (bytes [+0]=type, [+1]=flags, [+4]=bound, [+0x26]=enable), arg1 = stream
+  id (validated against [fp+4]); handler selected from 0x2000bae8 table as
+  [table + stream*8 + type*4]; handler struct has [+0x10] byte; calls
+  0x0101d464 (route/send?) and nmi_signal (0x100aca0)
+- stream event object layout starts: +0 type u8, +1 flags u8, +4 bound u32,
+  +0x26 enable u8
+- next: full decode of 0x1031e9e body + 0x101d464; then map the event
+  objects' producers (who builds them — the RMW status functions)

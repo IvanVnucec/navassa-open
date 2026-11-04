@@ -316,3 +316,18 @@ Confirmed by decode + tail-shape:
   helper 0x102b32c (cRxLock/cTxLock byte handling)
 - names tentative-but-structure-backed; verify by tracecmp when the queue
   path gets exercised end-to-end
+
+## Round 8 — MAJOR CORRECTION
+
+The 0x102axxx-0x102b3xx "queue.c cluster" is NOT FreeRTOS queue.c:
+- the blocked-wait struct has a ListItem_t at +0x24 and signed bytes at
+  +0x44/0x45 — Queue_t has wait-lists at +0x18/+0x2c (mismatch)
+- 0x0101b4fc renamed to vTaskPlaceOnUnblockedEventList (insert event
+  item + tail-call prvAddCurrentTaskToDelayedList — V10.2.1 shape ✓)
+- the whole 0x102axxx-0x102b3xx cluster = **ADI custom wait/notification
+  layer** built directly on kernel internals (xTaskNotifyWait,
+  custom lists, ICSR signals, BASEPRI critical sections) — consistent
+  with the app using task notifications instead of queues
+- queue.c may not be linked at all; FreeRTOS queue usage unconfirmed
+- configUSE_QUEUE_SETS / generic-queue paths: TBD
+- tools/symbols.txt relabeled accordingly

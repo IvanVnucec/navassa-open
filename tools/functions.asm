@@ -16108,7 +16108,7 @@
 0x0101b2e0:  bne      #0x101b30e
 0x0101b2e2:  b        #0x101b340
 
-; ==== sub_0101b348 @ 0x0101b348 (size ~28) ====
+; ==== heap_block_probe @ 0x0101b348 (size ~28) ====
 0x0101b348:  ldr.w    r0, [pc, #0x6f8]
 0x0101b34c:  ldr      r0, [r0, #0x4c]
 0x0101b34e:  bx       lr
@@ -16197,7 +16197,7 @@
 0x0101b4f6:  uxtb     r0, r0
 0x0101b4f8:  b.w      #0x100aca0
 
-; ==== sub_0101b4fc @ 0x0101b4fc (size ~40) ====
+; ==== vTaskPlaceOnUnblockedEventList @ 0x0101b4fc (size ~40) ====
 0x0101b4fc:  push     {r4, r5, r6, lr}
 0x0101b4fe:  mov      r5, r0
 0x0101b500:  mov      r6, r1
@@ -16214,7 +16214,7 @@
 0x0101b51e:  pop.w    {r4, r5, r6, lr}
 0x0101b522:  b        #0x101b9d8
 
-; ==== sub_0101b524 @ 0x0101b524 (size ~40) ====
+; ==== vTaskRemoveFromUnorderedEventList @ 0x0101b524 (size ~40) ====
 0x0101b524:  push     {r4, r5, r6, lr}
 0x0101b526:  ldr      r1, [r0, #0xc]
 0x0101b528:  ldr.w    r4, [pc, #0x420]
@@ -16358,7 +16358,7 @@
 0x0101b6b8:  ldr      r0, [r0, #0x44]
 0x0101b6ba:  bx       lr
 
-; ==== sub_0101b6bc @ 0x0101b6bc (size ~16) ====
+; ==== prvGetNextUnblockTime @ 0x0101b6bc (size ~16) ====
 0x0101b6bc:  ldr.w    r1, [pc, #0x384]
 0x0101b6c0:  ldr      r0, [r1, #0x28]
 0x0101b6c2:  ldr      r0, [r0]
@@ -16393,7 +16393,7 @@
 0x0101b70a:  str      r3, [r2, #0x18]
 0x0101b70c:  bx       lr
 
-; ==== sub_0101b70e @ 0x0101b70e (size ~80) ====
+; ==== ulTaskNotifyTake @ 0x0101b70e (size ~80) ====
 0x0101b70e:  push     {r4, r5, r6, lr}
 0x0101b710:  mov      r4, r0
 0x0101b712:  mov      r5, r1
@@ -16427,7 +16427,7 @@
 0x0101b75a:  mov      r0, r5
 0x0101b75c:  pop      {r4, r5, r6, pc}
 
-; ==== sub_0101b75e @ 0x0101b75e (size ~122) ====
+; ==== xTaskNotifyWait @ 0x0101b75e (size ~122) ====
 0x0101b75e:  push.w   {r4, r5, r6, r7, r8, lr}
 0x0101b762:  mov      r8, r0
 0x0101b764:  mov      r7, r1
@@ -16501,7 +16501,7 @@
 0x0101b888:  str      r1, [r2]
 0x0101b88a:  bx       lr
 
-; ==== sub_0101b88c @ 0x0101b88c (size ~52) ====
+; ==== sched_state_op_A @ 0x0101b88c (size ~52) ====
 0x0101b88c:  push.w   {r3, r4, r5, r6, r7, r8, sb, lr}
 0x0101b890:  mov      r7, r0
 0x0101b892:  mov      r6, r1
@@ -16521,7 +16521,7 @@
 0x0101b8ba:  bhi      #0x101b8e0
 0x0101b8bc:  tbb      [pc, sb]
 
-; ==== sub_0101b950 @ 0x0101b950 (size ~82) ====
+; ==== sched_state_op_B @ 0x0101b950 (size ~82) ====
 0x0101b950:  push.w   {r4, r5, r6, r7, r8, lr}
 0x0101b954:  mov      r5, r0
 0x0101b956:  mov      r4, r1
@@ -16754,7 +16754,7 @@
 0x0101bc2a:  movs     r3, #0
 0x0101bc2c:  b        #0x101bc34
 
-; ==== sub_0101bd1e @ 0x0101bd1e (size ~106) ====
+; ==== pvPortMalloc @ 0x0101bd1e (size ~106) ====
 0x0101bd1e:  push.w   {r2, r3, r4, r5, r6, r7, r8, lr}
 0x0101bd22:  mov      r4, r0
 0x0101bd24:  bl       #0x101b348
@@ -23494,7 +23494,7 @@
 0x0102aebc:  add      sp, #8
 0x0102aebe:  b        #0x102addc
 
-; ==== sub_0102aec0 @ 0x0102aec0 (size ~30) ====
+; ==== adi_wait_recv_A @ 0x0102aec0 (size ~30) ====
 0x0102aec0:  push.w   {r1, r2, r4, r5, r6, r7, r8, sb, sl, lr}
 0x0102aec4:  sub      sp, #8
 0x0102aec6:  mov      r6, r0
@@ -23514,7 +23514,7 @@
 0x0102afd0:  mov      r0, sp
 0x0102afd2:  b.w      #0x101b5de
 
-; ==== sub_0102afd6 @ 0x0102afd6 (size ~24) ====
+; ==== adi_wait_recv_B @ 0x0102afd6 (size ~24) ====
 0x0102afd6:  push.w   {r3, r4, r5, r6, r7, r8, sb, lr}
 0x0102afda:  mov      r6, r0
 0x0102afdc:  mov      r5, r1
@@ -23543,7 +23543,7 @@
 0x0102b064:  mov      r4, r1
 0x0102b066:  b.w      #0x100aca0
 
-; ==== sub_0102b06a @ 0x0102b06a (size ~24) ====
+; ==== adi_wait_isr_A @ 0x0102b06a (size ~24) ====
 0x0102b06a:  push.w   {r0, r1, r2, r4, r5, r6, r7, r8, sb, lr}
 0x0102b06e:  mov      r7, r0
 0x0102b070:  mov      r6, r1
@@ -23587,10 +23587,10 @@
 0x0102b29a:  mov      r0, r6
 0x0102b29c:  b        #0x102b32c
 
-; ==== sub_0102b2a6 @ 0x0102b2a6 (size ~2) ====
+; ==== adi_is_empty_A @ 0x0102b2a6 (size ~2) ====
 0x0102b2a6:  ldr      r0, [r6, #0x40]
 
-; ==== sub_0102b2a8 @ 0x0102b2a8 (size ~8) ====
+; ==== adi_is_empty_B @ 0x0102b2a8 (size ~8) ====
 0x0102b2a8:  subs     r0, r0, #1
 0x0102b2aa:  sbcs     r0, r0
 0x0102b2ac:  lsrs     r0, r0, #0x1f
@@ -23637,7 +23637,7 @@
 0x0102b326:  mov      r0, r3
 0x0102b328:  b.w      #0x101204c
 
-; ==== sub_0102b32c @ 0x0102b32c (size ~44) ====
+; ==== adi_wait_state_helper @ 0x0102b32c (size ~44) ====
 0x0102b32c:  push     {r3, r4, r5, r6, r7, lr}
 0x0102b32e:  mov      r5, r0
 0x0102b330:  bl       #0x102bf6c
@@ -23677,7 +23677,7 @@
 0x0102b3b2:  blo      #0x102b3a8
 0x0102b3b4:  pop      {r4, pc}
 
-; ==== sub_0102b3cc @ 0x0102b3cc (size ~72) ====
+; ==== adi_wait_block_helper @ 0x0102b3cc (size ~72) ====
 0x0102b3cc:  push     {r3, r4, r5, r6, r7, lr}
 0x0102b3ce:  mov      r4, r0
 0x0102b3d0:  mov      r5, r1
@@ -23976,7 +23976,7 @@
 0x0102bef2:  strb     r0, [r6]
 0x0102bef4:  b        #0x102bf04
 
-; ==== sub_0102bf6c @ 0x0102bf6c (size ~40) ====
+; ==== task_enter_critical @ 0x0102bf6c (size ~40) ====
 0x0102bf6c:  movs     r0, #0x30
 0x0102bf6e:  msr      basepri, r0
 0x0102bf72:  dsb      sy

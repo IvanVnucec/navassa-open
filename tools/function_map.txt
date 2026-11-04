@@ -857,7 +857,7 @@
 0x0101b232     102  BL x22             push {r4, lr}                    
 0x0101b2ac      56  BL x6              ldr.w r0, [pc, #0x794]           
 0x0101b2b8      44  BL x12             push {r3, r4, r5, r6, r7, lr}    
-0x0101b348      28  BL x13             ldr.w r0, [pc, #0x6f8]           
+0x0101b348      28  BL x13             ldr.w r0, [pc, #0x6f8]           heap_block_probe
 0x0101b364      70  BL x5              push.w {r3, r4, r5, r6, r7, r8, sb, lr} xTaskIncrementTick
 0x0101b418      22  BL x4              ldr r0, [r5, #0x2c]              
 0x0101b426       8  BL x4              add.w r0, r5, #0x18              
@@ -866,8 +866,8 @@
 0x0101b4ac       8  BL x4              mov r4, r0                       
 0x0101b4ee      14  BL x8              ldr.w r0, [pc, #0x558]           
 0x0101b4f6       6  BL x4              uxtb r0, r0                      
-0x0101b4fc      40  BL x1              push {r4, r5, r6, lr}            
-0x0101b524      40  BL x3              push {r4, r5, r6, lr}            
+0x0101b4fc      40  BL x1              push {r4, r5, r6, lr}            vTaskPlaceOnUnblockedEventList
+0x0101b524      40  BL x3              push {r4, r5, r6, lr}            vTaskRemoveFromUnorderedEventList
 0x0101b566      16  BL x4              ldr r0, [r6, #0x78]              
 0x0101b568      14  BL x3              ldr r1, [r0, #0x2c]              
 0x0101b570       6  BL x10             adds r0, r5, #4                  
@@ -877,15 +877,15 @@
 0x0101b67a      82  BL x2              blo #0x101b68e                   
 0x0101b690      60  BL x1              cmp r1, #2                       
 0x0101b6a4      40  BL x2              mov r2, r0                       
-0x0101b6bc      16  BL x3              ldr.w r1, [pc, #0x384]           
+0x0101b6bc      16  BL x3              ldr.w r1, [pc, #0x384]           prvGetNextUnblockTime
 0x0101b6d8     134  BL x5              ldr.w r0, [pc, #0x36c]           
 0x0101b6e0     126  BL x6              ldr.w r1, [pc, #0x360]           
-0x0101b70e      80  BL x2              push {r4, r5, r6, lr}            
-0x0101b75e     170  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
+0x0101b70e      80  BL x2              push {r4, r5, r6, lr}            ulTaskNotifyTake
+0x0101b75e     170  BL x3              push.w {r4, r5, r6, r7, r8, lr}  xTaskNotifyWait
 0x0101b7d8      48  BL x3              push.w {r4, r5, r6, r7, r8, lr}  
 0x0101b882      62  BL x3              ldr r2, [pc, #0x1c8]             
-0x0101b88c      52  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
-0x0101b950      82  BL x5              push.w {r4, r5, r6, r7, r8, lr}  
+0x0101b88c      52  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} sched_state_op_A
+0x0101b950      82  BL x5              push.w {r4, r5, r6, r7, r8, lr}  sched_state_op_B
 0x0101b9c6      16  BL x1              ldr r0, [r7, #0x7c]              
 0x0101b9d8      64  BL x8              push.w {r4, r5, r6, r7, r8, lr}  prvAddCurrentTaskToDelayedList
 0x0101ba9e      60  BL x4              ldr r1, [pc, #0x38]              
@@ -895,7 +895,7 @@
 0x0101bb76     124  BL x4              push.w {r2, r3, r4, r5, r6, r7, r8, lr} 
 0x0101bbb8      58  BL x1              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0101bbf6      56  BL x7              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
-0x0101bd1e     106  BL x6              push.w {r2, r3, r4, r5, r6, r7, r8, lr} 
+0x0101bd1e     106  BL x6              push.w {r2, r3, r4, r5, r6, r7, r8, lr} pvPortMalloc
 0x0101bd92      28  BL x5              push {r3, r4, r5, lr}            
 0x0101be78      78  BL x5              push {r2, r3, r4, lr}            
 0x0101beda      36  BL x10             push {r3, r4, r5, lr}            
@@ -1253,14 +1253,14 @@
 0x0102ad88      12  BL x5              push {r4, lr}                    
 0x0102ae42      58  BL x3              push {r3, r4, r5, r6, r7, lr}    
 0x0102aeaa      22  BL x2              sub sp, #8                       
-0x0102aec0      30  BL x2              push.w {r1, r2, r4, r5, r6, r7, r8, sb, sl, lr} 
+0x0102aec0      30  BL x2              push.w {r1, r2, r4, r5, r6, r7, r8, sb, sl, lr} adi_wait_recv_A
 0x0102afce       8  BL x3              add r1, sp, #0xc                 
 0x0102afd0       6  BL x2              mov r0, sp                       
-0x0102afd6      24  BL x3              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
+0x0102afd6      24  BL x3              push.w {r3, r4, r5, r6, r7, r8, sb, lr} adi_wait_recv_B
 0x0102b046      14  BL x4              cmp r7, #2                       
 0x0102b05a       8  BL x4              add.w r0, r6, #0x24              
 0x0102b062       8  BL x2              mov r5, r0                       
-0x0102b06a      24  BL x4              push.w {r0, r1, r2, r4, r5, r6, r7, r8, sb, lr} 
+0x0102b06a      24  BL x4              push.w {r0, r1, r2, r4, r5, r6, r7, r8, sb, lr} adi_wait_isr_A
 0x0102b16c       6  BL x3              mov r0, sp                       
 0x0102b172      38  BL x5              ldrsb.w r1, [r0, #1]             
 0x0102b17c      28  BL x2              mrs r8, basepri                  
@@ -1268,14 +1268,14 @@
 0x0102b190       8  BL x3              add.w r0, r5, #0x10              
 0x0102b28c      18  BL x3              add.w r0, r6, #0x44              
 0x0102b29a       4  BL x5              mov r0, r6                       
-0x0102b2a6      50  BL x2              ldr r0, [r6, #0x40]              
-0x0102b2a8      48  BL x5              subs r0, r0, #1                  
+0x0102b2a6      50  BL x2              ldr r0, [r6, #0x40]              adi_is_empty_A
+0x0102b2a8      48  BL x5              subs r0, r0, #1                  adi_is_empty_B
 0x0102b2b0      40  BL x4              push {r4, r5, r6, lr}            
 0x0102b304      40  BL x1              ldr r2, [r0, #0x40]              
-0x0102b32c      44  BL x4              push {r3, r4, r5, r6, r7, lr}    
+0x0102b32c      44  BL x4              push {r3, r4, r5, r6, r7, lr}    adi_wait_state_helper
 0x0102b38c      22  BL x3              push {r4, lr}                    
 0x0102b3a2      20  BL x1              push {r4, lr}                    
-0x0102b3cc      72  BL x1              push {r3, r4, r5, r6, r7, lr}    
+0x0102b3cc      72  BL x1              push {r3, r4, r5, r6, r7, lr}    adi_wait_block_helper
 0x0102b414     202  BL x2              push.w {r3, r4, r5, r6, r7, r8, sb, lr} 
 0x0102b506      88  BL x25             movs r1, #0x70                   
 0x0102b55e      20  BL x21             push {r4, lr}                    
@@ -1289,7 +1289,7 @@
 0x0102b7bc       8  VEC[245]           ldr r0, [pc, #0x10]              
 0x0102be68      38  BL x5              lsrs r1, r1, #1                  
 0x0102beaa      76  BL x6              push {r2, r3, r4, r5, r6, lr}    
-0x0102bf6c      40  BL x53             movs r0, #0x30                   
+0x0102bf6c      40  BL x53             movs r0, #0x30                   task_enter_critical
 0x0102bf96      24  BL x66             push {r4, lr}                    
 0x0102bfae      28  VEC[15]            push {r7, lr}                    xPortSysTickHandler_wrapper
 0x0102bfca      76  BL x1              movs r0, #0x30                   

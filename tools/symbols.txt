@@ -54,20 +54,20 @@
 101b6bc prvGetNextUnblockTime
 # queue.c cluster (structural: Queue_t field usage + wakeup tail calls)
 102b32c queue_send_recv_cluster_A
-102b3cc queue_lock_helper_B
+102b3cc adi_wait_block_helper
 # heap_4
 101bd1e pvPortMalloc
 101b348 heap_block_probe
 # tasks.c extras
 101b524 vTaskRemoveFromUnorderedEventList
-101b4fc vTaskPlaceOnEventList
+101b4fc vTaskPlaceOnUnblockedEventList
 # queue.c (tentative but structure-backed)
-102aec0 xQueueGenericReceive
-102afd6 xQueueSemaphoreTake
-102b06a xQueueReceiveFromISR_A
-102b198 xQueueReceiveFromISR_B
-102b32c queue_unlock_helper
-102b2a6 prvIsQueueEmpty_A
-102b2a8 prvIsQueueFull_B
+102aec0 adi_wait_recv_A
+102afd6 adi_wait_recv_B
+102b06a adi_wait_isr_A
+102b198 adi_wait_isr_B
+102b32c adi_wait_state_helper
+102b2a6 adi_is_empty_A
+102b2a8 adi_is_empty_B
 102bf6c task_enter_critical
 # port statics: 0x2000b650 = ucMaxSysCallPriority(+0), uxCriticalNesting(+4)

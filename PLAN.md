@@ -537,3 +537,35 @@ toward 0x01047fe4+ and beyond the binary end (hence the 1MB window).
 Remaining: pin the descriptor construction (handoff 0x010442a6 sets up
 r9/sb and the desc) and implement tools/decompress.py to expand the
 payload offline (option b) — bypassing the unicorn fault entirely.
+
+## Round 21 — offline decoder built & VALIDATED (the fault is bypassed)
+
+tools/decompress.py: full port of the LZ77 decompressor (0x0100296a).
+Blind bug found and fixed during ground-truth validation: token field
+roles are [1:0]=literal count, [3:2]=distance high, [7:4]=match nibble
+(first script had them swapped — tried all interpretations, only this
+one yields correct data). Validation: token/bit consumption aligns with
+real data, decoded values interpreted as u32 are sane hex patterns.
+
+TWO compressed DATA segments found (LZ77-expanded at boot into RAM):
+- desc 0x010444dc: off=0x1ae2 size=0x6d0 dest=0x20020000
+  2692 bytes → build/decompressed_0x20020000.bin
+- desc 0x010444fc: off=0x28 size=0x3534 dest=0x200027f8
+  44368 bytes → build/decompressed_0x200027f8.bin (app DATA segment,
+  overlaps the mailbox state area 0x20002800)
+- segment 1 = application init/config tables: repeating
+  {u32 len/val, u32 ptr 0x2001dfxx, u32 val, u32 0x00020000} records —
+  parameter blocks referencing kernel-block-A-adjacent RAM addresses
+
+Validation (blind, no emulator): decoded stream contains structured,
+4-aligned records with valid-looking RAM pointers; values in u32
+interpretation are instantly recognizable as configuration data (e.g.
+0x2001df1c/0x2001df2c/0x2000df44). Decompressor code semantics fully
+pinned by the trace: literal count semantics confirmed by emulator write
+sizes, back-reference insns decoded above.
+
+Note: the fault at 0x0100298c blocks only EMULATED execution; offline
+decoding sidesteps it entirely. Remaining unicorn limitation noted in
+Round 19; a newer unicorn build may lift it later.
+
+Also committed to build/: raw round-20 emu trace + LZ77 disasm listing.

@@ -683,3 +683,18 @@ crit pair + SS helpers + state setter) — remaining: who calls
   IRQ180/181: stream_int_handler_A/B (our named handlers!) — confirmed
   as real interrupt vectors.
   IRQ 22-25: 0x01000ffc/169a/1204/169e — the remaining stream group.
+
+## Round 27 — stream object "wait flags" mechanism
+
+- 0x1023f52 = stream_flag_tail(arg0 obj, arg1 bits): BASEPRI=0x30, obj
+  = arg0+0xb0 (a wait-extension area!), flag word @+0x18 |= arg1 bits
+  (r1 OR'd with obj+0x18), then CALLS [obj+0] (a callback fn pointer!)
+  and restores BASEPRI. Callers:
+    0x1023f68/-f7c = wrappers storing 1 / 0x21 into [obj+0xb0+0x18]
+    0x1023ebe/n, 0x1028a98, 0x102a86c, 0x103bcc2 (the vector bridge)
+- 0x1023fca = dependency_search(obj, wanted): walks obj->list (obj+0xc,
+  entries 4-byte ptrs, count?) comparing to target, returns match (an
+  intrusive list search!) — used by dispatcher or wait code.
+- The streaming framework now clearly = a callback-driven state machine:
+  stream objects carry [0]=handler fn ptr, [0xb0+0x18]=flag word for the
+  scheduler — flags being set by completions and cleared on timeouts.

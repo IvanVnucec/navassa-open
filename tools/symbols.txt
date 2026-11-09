@@ -102,3 +102,9 @@
 10232c6 sched_set_state_then_pend
 102b572 sched_channel_set_state
 102b414 sched_state_op_user
+1023f52 stream_flag_tail
+1023f68 stream_flag_set_1
+1023f7c stream_flag_set_0x21
+# stream obj: +0 = callback fn ptr (called!), +0xb0 = wait-extension area,
+# +0xb0+0x18 = flag word (bit0/bit5 set by tail)
+1023fca dependency_search

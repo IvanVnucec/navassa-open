@@ -657,3 +657,29 @@ notifications per channel.
 crit pair + SS helpers + state setter) — remaining: who calls
 0x1023710/0x10232f6 (0 callers each — they must be reached indirectly:
 0x1028a2a/98 likely dispatch). Next: decode 0x1028a2a/0x1028a98.
+
+## Round 26 — IRQ map + scheduler call chain complete
+
+- 0x1028a2a = timer IRQ handler: per-timer-slot scan (table 0x2000b65c,
+  16 slots): slot has flag byte [+0xd] & (1<<arg), state [+1]==2, pending
+  count [+0xc]==0 → state=3, body [+4]: state==7 → op chain. Slots 16/17 =
+  per-timer "channels" (the 0x102a op family = timer notify handlers).
+- 0x1028a98 = the variant for state==3, calls 0x102382c (a block check),
+  0x1028d1c compare → sched ops.
+- 0x103bcc2 = vector_irq_A: reads [0x2001ccf8+4] = ACTIVE channel/stream,
+  calls timer scan; on event: tail 0x1023f52(stream_id, 9, table@
+  0x01044520 use) — the stream-framework bridge from timer IRQ!
+  NOTE: parts of 0x103bcc0/2 bytes decode as ldr/strb without ldr
+  literal (pc-relative reads from 0x01044520 = vtable).
+  CALLERS: reached via VECTOR slot 187 (IRQ171) — an interrupt handler!
+  (0x100bcc0 (=x86 garbage artifacts of THUMB
+  decoding) — functions.asm has desynced extent for it, ok.)
+- FULL IRQ MAP EXTRACTED (256 slots, 100+ distinct handlers): committed
+  as tools/irq_map.txt. NOTE high slots 176..203 = the SPI/host/DMA
+  timers (0x010440bc/1044104/10440de/104415c = the "boot_msg" family
+  entries!) — IRQ160/163/166/167 map DIRECTLY to the trampolines used in
+  boot: the "boot-state flags" ARE the four timer IRQ callbacks (see
+  0x01044278 → 0x10501bc jump family).
+  IRQ180/181: stream_int_handler_A/B (our named handlers!) — confirmed
+  as real interrupt vectors.
+  IRQ 22-25: 0x01000ffc/169a/1204/169e — the remaining stream group.

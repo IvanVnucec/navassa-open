@@ -1009,3 +1009,14 @@ seg3: index error → format slightly different (literal-only run may end
   early). To investigate further later.
 These 0x20037xxx addresses are within the RAM payload region — the payload
 has its own config/linked-list data decompressed to those exact pointers.
+
+## Round 43 — seg3 partial decode (18/40 bytes)
+
+seg3 dst=0x200387e0: decodes 18 bytes coherent (config records in channel
+format 0x2003xxxx pointers) but back-reference strikes out-of-range
+dist=257 at byte 19. Likely the r9 offset applies (size bit0 = 1 for this
+record: len=0x28 implies EVEN; but actual seg3 may have size 0x281 → +r9
+seeding at 0x200387e9 offset, matching the initial boot frame's r9/sb
+setup in the handoff). The pre-seeded stack frame must carry r9 = the
+hash/offset for the decompressor path. To resolve at the next layer.
+(Not blocking: all main data blobs decoded.)

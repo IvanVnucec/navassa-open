@@ -698,3 +698,19 @@ crit pair + SS helpers + state setter) — remaining: who calls
 - The streaming framework now clearly = a callback-driven state machine:
   stream objects carry [0]=handler fn ptr, [0xb0+0x18]=flag word for the
   scheduler — flags being set by completions and cleared on timeouts.
+
+## Round 28 — SPI engine IRQ handlers + blob1 refinement
+
+- 0x0102a86c (IRQ63) = spi_stream_irq_A: MMIO write 0x58000040=0x800 (the
+  0x5800xxxx peripheral region — first app access!), bl 0x10028ac(0x3e),
+  0x100ae0a(9,0), state block 0x2001fa58: [+0x1b] busy flag (cleared),
+  [+0x16] state → dispatch to stream xfer machinery. THE 0x5800 region =
+  streaming engine HW.
+- 0x0102abe4 (IRQ62) = spi_stream_irq_B (RX variant): write 0x58000040=
+  0x2000/0x1000 (two-step ack), 0x100ae0a(0x3b,0), 0x1002880/2896(0x3e),
+  state check [0x2001fa58+0] == 5.
+- 0x0100ae34-adjacent helpers 0x100ae0a / 0x10028ac / 0x1002880 / 0x1002896
+  = app-level event/deassert primitives for the stream engine.
+- blob1 records: 102 patch records. The trailing 0x2000d43x/0x2000d44x
+  pointers land INSIDE blob2's data (0x200027f8+0x5xxx/0x5c40) — segments
+  reference each other. Tail value 0x00000014 = ? (to check).

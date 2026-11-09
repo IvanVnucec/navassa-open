@@ -82,3 +82,15 @@
 1028ba8 stream_ctrl_event_dispatch
 103496e cal_dwt_timed_op
 101d464 event_action_executor
+# ADI scheduler.c module (channel state machine handlers)
+10232f6 sched_channel_op_22
+10233b8 sched_channel_op_23
+1023458 sched_channel_op_25
+# 0x2001aac8 = per-channel state array, 76B/channel:
+#   +4/ +0x14/ +0x1c (+76*ch) = counters;  +0x2c = heap-allocated body ptr;
+#   body: +0x1c state, +0x44..+0x5c callback slots(8), +0x64 sentinel 0xff
+1024050 sched_vm_op
+1028c1a sched_ss_helper1
+10289c4 sched_ss_helper2
+1028b4a sched_ss_helper3
+1028b76 sched_ss_helper4

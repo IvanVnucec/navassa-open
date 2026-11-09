@@ -599,3 +599,22 @@ Next: identify the code that applies blob1's patch records (CLZ scan for
 reads of 0x20020000); map the app data segment fields via the known
 addresses (0x20002800 mailbox state); then resume translation with real
 data in hand.
+
+## Round 23 — the scheduler.c module surfaces
+
+Functions 0x10232f6/0x10233b8/0x1023458 = channel state-machine handlers
+(state codes 0..7 at [ch+0x1c]):
+- enter critical section (0x1036d24 + 0x1036d82 pair, level 0xb/4/5/8)
+- mailbox_xfer(cmd = 0x22/0x23/0x25, channel) — per-channel mailbox cmds!
+- bump per-channel counters in array @0x2001aac8 (76B/channel: counters at
+  +4/+0x14/+0x1c, heap body ptr at +0x2c; body: state @+0x1c, 8 callback
+  slots @+0x44..+0x5c, sentinel 0xff @+0x64)
+- dispatch callbacks; producers 0x1028ba8/0x1028b76; VM op 0x1024050;
+  on error: boot_msg(1, code, 3) + state ptr + 0x139/0x1a2 codes at
+  0x200002d4/0x200002d8 (the "flags" pair from the reset handler!)
+- heap allocation verified: per-channel body comes from pvPortMalloc
+  (0x101b348 probe helper)
+This ties together: mailbox cmds 0x22/0x23/0x25, the stream event
+framework, the reset-handler "error code" pair, and FreeRTOS heap.
+The 0x20020000 patch-table applier is still unresolved (only 2 literal
+refs: 0x1023302 = inside sched_channel_op_22! and 0x10444e4 = descriptor).

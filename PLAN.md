@@ -965,3 +965,17 @@ again by direct store).
 Also found: refs tables of .c filenames → 0x01044030/0x01044050 etc =
 the per-channel reg tables listed in tools/irq_map analysis. Most rings
 already decoded.
+
+## Round 40 — decimal decode correction + Task/Timer creation conclusion
+
+Correction on the earlier round: those literals ARE the marginal pool
+references inside the functions already decoded (0x101b88c / 0x101b9c6 /
+0x101b9d8), NOT xTaskCreate sites. The idle-TCB const record is accessed
+via pxCurrentTCB load + list-insert; earlier interpretation that IDLE
+string is the const-init blob stands: no more refs. So:
+- Idle task, timer task: const-initialized (configSUPPORT_STATIC_ALLOCATION
+  semantics or a static creator variant)
+- Dynamic timer creation via app: TempTimer / HealthMonitorTimer — the
+  pattern not yet reached, likely in scheduler.c/cal table-driven code
+  (deferred to the RAM payload translation phase)
+- The whole 0x0101bxxx flash range = the kernel + scheduler bridge

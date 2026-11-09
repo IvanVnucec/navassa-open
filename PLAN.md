@@ -848,3 +848,28 @@ Remaining unknowns / next:
 The SPI module uses a GENERIC kernel-like wait flag layer (already
 decoded as ADI custom wait layer earlier); both SPI IRQ completion paths
 dispatch through it.
+
+## Round 34 — calibration engine (IRQ253 = 0x103496e) decoded head
+
+- ctx = driver context (0x20000404)
+- byte [ctx+0x77f] tested against 1 (HW-rev selector — TX vs RX radio?); if
+  not 1, calls 0x10085c0(7) — auxiliary selector
+- state block 0x2001fc14: [+8] = run flag (cleared on entry = "already
+  running"), [+0xa] = copy of byte [0x20000230] (profile/mode)
+- copies功底table at 0x20000230 (r7!): layout:
+   [r7+0x00] byte -> state[+0xa]
+   [r7+0x04..] -> ctx[+0x24]  (via helper 0x10348fc)
+   [r7+0x14..] -> ctx[+0xe0]
+   [r7+0x44..] -> ctx[+0x314]
+   [r7+0x54..] -> ctx[+0x3d0]
+   [r7+0x64..] -> ctx[+0x48c]
+   [r7+0x74..] -> ctx[+0x548]
+   [r7+0x84..] -> ctx[+0x604]
+   [r7+0x94..] -> ctx[+0x6c0]
+  — the ctx is a set of per-channel/per-band calibration parameter banks!
+- alternation helper 0x1034c80/0x1034c78 = phase toggling (likely a
+  calibration sequence stepper)
+This is the per-band tracking/utilization calibration data copy path
+during start-up. tracking_cals.c / cal_task_core.c territory confirmed.
+Next: continue decode (0x1034908/0x10348fc/0x1034c80 bodies), the
+run-state machine's decision tree, then cal completion callbacks.

@@ -804,3 +804,29 @@ or a leaf function known by convention. Next attempt: trace the function
 called after post-decompress memcpy: check `monitor_drv.c`/`mcs.c` region
 for the pattern 'for each 16B record: masked RMW at [ptr+ ofs] with
 field_bits/field_mask' OR simply note the pattern as TODO.
+
+## Session progress checkpoint
+
+Status (after another ~10 pushes this run):
+- Validated the offline decompressor (all 2 data blobs correct)
+- scheduler.c module: state setter, notify wrapper with real PendSV,
+  dependence DAG scanner, lock table, VM/table interpreter
+- Timer/scheduler IRQ top (0x1028a2a/98) + stream framework "wait flag"
+  tail (obj+0xb0+0x18 |= bits, callback invocation, BASEPRI 0x30 guard)
+- Stream flag bits map to waiters on specific data (obj=[+0xb0] extension
+  area) — callbacks installed at [obj+0]
+- SPI streaming engine module full: TX/RX DWT-path IRQ handlers, common
+  thunk table, engine status block, 0x58000040 control word register
+- dma.c module: multi-channel config/cleanup over shared per-channel
+  register tables
+- mailbox_notify_flush found: the single second ring-writer (all host
+  notifications funnel here); host protocol complete
+- Literal scan artifact resolved: single link between patch table and
+  its applier is via the descriptor; applier loop to be decoded when
+  reached
+Remaining unknowns / next:
+1. event-action applier loop (blob1 16B records)
+2. calibration / tracking / MCS modules
+3. RAM payload .text campaign (blocked by unicorn 2.1.4 fault but
+   approachable statically once the fork of payload handlers start
+   naming at scale)

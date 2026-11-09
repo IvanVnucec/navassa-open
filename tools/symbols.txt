@@ -133,3 +133,4 @@
 # stream obj wait-extension: flag word @+0xb8 (bits: 1/0x21/0x40 setpoints)
 # event obj: [+0] cb ptr; [+4] channel; [+0x10] byte; [+0x24] mode; [+0x26] en;
 #   wait obj: [+0x60] mask, [+0x64] priority
+100a7ea xPortGetFreeHeapSize

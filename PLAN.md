@@ -931,3 +931,14 @@ again by direct store).
 - Both spawn paths live in the radio-config state machine family (huge =
   0x1019xxx-0x101axxx region is the low-level radio config writer —
   the same "byte-write" style as 0x1002db4 pin_update)
+
+## Round 38 — pvPortMalloc entry corrected + heap interface
+
+- 0x101b348 IS pvPortMalloc (earlier named heap_block_probe) — wrapper
+  0x0100a7ea = xPortGetFreeHeapSize (malloc-base subtraction, tiny).
+- pvPortMalloc callers (flash side): 0x100b15c, 0x101bd1e (extended ctx
+  fields — app data structure allocs), 0x10232f6 (per-channel body!).
+- The timer-creation path for TempTimer/HealthMonitorTimer strings has no
+  direct literal; strings probably referenced by a base+offset arithmetic
+  (string table). TODO continue with xTimerCreate via the notify/timer
+  xQueueGenericSend path.

@@ -1020,3 +1020,33 @@ seeding at 0x200387e9 offset, matching the initial boot frame's r9/sb
 setup in the handoff). The pre-seeded stack frame must carry r9 = the
 hash/offset for the decompressor path. To resolve at the next layer.
 (Not blocking: all main data blobs decoded.)
+
+## Session checkpoint 3 (after ~18 pushes this run)
+
+Full state of the reverse-engineering:
+
+KERNEL (V10.2.1): complete — tasks/list/queue-free notify-wait, heap_4,
+port handlers data blocks A/B/port-statics. pxCurrentTCB @0x2001e564.
+STATIC const-init of IDLE / TmrSvc tasks identified.
+
+APP layers mapped this run:
+- boot/init: 16/16 C-translated, trace-match verified
+- mailbox / host-comms: complete; sole ring writers = mailbox_xfer and
+  mailbox_notify_flush
+- scheduler.c: state setter, notify wrapper (real PendSV), dependency
+  DAG, per-channel state arrays, timer IRQ handlers	reset, per-channel
+  channel op machines — full behavior decoded
+- event framework: IRQs -> dispatcher -> action executor -> pin_update
+  (verified in C)
+- SPI engine: DWT-timed SPI op + TX/RX IRQ handlers + wait-flag
+  interface (bit setpoints 1/0x21/0x40 + stream callbacks @obj+0)
+- DMA: multi-channel cfg / cleanup over shared per-channel tables
+- Calibration engine (IRQ253 handler): profile-table scatter into
+  linked lists per band/channel + control-byte register writes,
+  per-core resets; radio config spawners (0x46001600 per-channel table)
+- Timer/Task const-init records (IDLE / TmrSvc strings) decoded
+- LZ77 decompression: full decoder (validated), all data blobs
+  extracted; 2 linked-list tables for RAM payload decoded
+
+Open: seg3 (r9-seeded), patch applier loop, calibration multi-step flow,
+RAM payload code translation (next big campaign)

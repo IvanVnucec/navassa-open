@@ -120,3 +120,5 @@
 # 0x58000040 = streaming engine control reg (0x800=TX start, 0x2000/0x1000=RX ack steps)
 # 0x2001fa58 = stream-engine state (busy @0x1b, state @0x16/[0])
 # 0x2000d9b0 / 0x2001fbdc = spi engine ctx blocks
+100ad34 mailbox_notify_flush
+# 0x4700200c = another SEMA4/MU-side reg (bit1 RMW, critical)

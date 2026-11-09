@@ -730,3 +730,20 @@ crit pair + SS helpers + state setter) — remaining: who calls
   0x2000d9b0, 0x2001fbdc
 - spimaster.c module = the SPI path to the radio frontends; interacts
   via the stream-obj flag/callback machinery decoded in round 27
+
+## Round 30 — mailbox flush + host notify decoded
+
+- 0x100ad34 = mailbox_notify_flush: same ring-writer shape as
+  mailbox_xfer but with cmask 0x8000003f and LAST-COUNT reset to 0xFF00
+  0000 (mvn), used to push an immediate host-notify packet. Confirms the
+  ring protocol is the ONLY host channel (all notifications funnel here).
+- The 0x4700200c register: bit1 RMW inside critical section (sema/mu side
+  hand-shake reg, adjacent to counter 0x47002004).
+- The "0x49000000-1C literal users" at 0x1006380-ad2c = the SAME boot init
+  (pattern table for periph_init + read_periph_reg); plus one ref to
+  0x100ad18 region = flush/notify code (literal table row spanning
+  0x1006380-0x100ad2c shared).
+Both mailbox_xfer (cmd 0x22/0x23/0x25 per channel) and
+mailbox_notify_flush write into the SAME ring at 0x2002516c-control —
+so the whole app coordinate/channel/tab/scheduler machinery back-ends
+automatically into host-comms.

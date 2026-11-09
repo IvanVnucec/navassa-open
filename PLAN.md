@@ -618,3 +618,24 @@ This ties together: mailbox cmds 0x22/0x23/0x25, the stream event
 framework, the reset-handler "error code" pair, and FreeRTOS heap.
 The 0x20020000 patch-table applier is still unresolved (only 2 literal
 refs: 0x1023302 = inside sched_channel_op_22! and 0x10444e4 = descriptor).
+
+## Round 24 — scheduler dependency machinery decoded
+
+- 0x200025b0 = new master config/lock block (64B stride entries, bitfield
+  words at +0xb0*4?? — critical-lock table, 17 entries max (cmp #0x11))
+- 0x1036d24/0x1036d82 = scheduler lock check pair: reads lock count [blk
+  +0x240], per-entry lock words [blk + idx*64 + 0x2c0], bit tests
+- 0x1023710 = DEPENDENCE SCANNER over a dependency table (vm+0xc words,
+  count vm+8): walks entries BACKWARD (decrementing index), for each dep:
+    - 0x1028d1c (dep_compare) computes 3 flags from the two channel
+      structs: [0x60]&[0x60] (mask AND), [0x64] equality, [0x14] mod-4/12
+      phase-group match
+    - flag0 -> op_25 (unbind/remove), flag1 or state==7 -> op_23 (requeue),
+      else note-first-blocked
+  - error path: table too big or bad index -> boot_msg(1, 0xff30, 3) with
+    state 0x2d5
+  - returns first blocked channel (r4) for yield decision
+- channel struct now has: +0xc dep table, +8 dep count, +0x14 group bits,
+  +0x60 mask, +0x64 prio byte, +0x1c state
+This is a wait-dependency/DAG resolver for the ADI scheduler (scheduler.c
+resource-dependency handling).

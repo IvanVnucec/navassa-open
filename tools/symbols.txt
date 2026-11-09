@@ -94,3 +94,8 @@
 10289c4 sched_ss_helper2
 1028b4a sched_ss_helper3
 1028b76 sched_ss_helper4
+1023710 sched_dependence_scanner
+1028d1c sched_dep_compare
+1036d24 crit_lock_check_A
+1036d82 crit_lock_check_B
+# 0x200025b0 = lock/config master block (64B stride, 17 entries, bitfields)

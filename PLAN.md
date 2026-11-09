@@ -569,3 +569,33 @@ decoding sidesteps it entirely. Remaining unicorn limitation noted in
 Round 19; a newer unicorn build may lift it later.
 
 Also committed to build/: raw round-20 emu trace + LZ77 disasm listing.
+
+## Round 22 — decompressed blobs validated & characterized
+
+Token interpretation crosscheck: both decompress paths (tools/decompress.py
+and the debug decoder) use identical bit fields ([1:0]=lit count,
+[3:2]=dist hi, [7:4]=match nibble) — earlier confusion unfounded.
+
+Blob 1 (0x20020000, 2692B): 16-byte field-patch records
+  {u32 value, u32 ram_ptr, u32 field_bits, u32 field_mask}
+  pointers target: 0x2001dfxx (app cfg block below kernel block A),
+  0x2000b7xx (port statics region), 0x2001c9xx, 0x2001f2xx, 0x2000b70c.
+  Value examples: 0x1100/0xa00/0x400/0x4100/0xc000 vs masks
+  0x00020000/0x00100000/0x00004000 — boot applies these register field
+  writes via this table (the actual applier TBD).
+
+Blob 2 (0x200027f8, 44368B = app DATA segment):
+  - 8B of 0xff sentinels at 0x20002800 (mailbox state block area)
+  - 5129B of 0xff at 0x2000b678 (right after port statics block —
+    likely a pool/arena)
+  - NCO/DDS tuning-word table: linear ramp step 0x0bebc200 (=200,000,000)
+    starting 0x08f0d180 — 64+ entries
+  - zero-gap markers at ~0x2000a31f
+Validation achieved: both blobs decode into coherent aligned records and
+recognizable domain data — decompressor implementation is CORRECT.
+
+Artifacts: build/decompressed_0x20020000.bin, build/decompressed_0x200027f8.bin
+Next: identify the code that applies blob1's patch records (CLZ scan for
+reads of 0x20020000); map the app data segment fields via the known
+addresses (0x20002800 mailbox state); then resume translation with real
+data in hand.

@@ -942,3 +942,26 @@ again by direct store).
   direct literal; strings probably referenced by a base+offset arithmetic
   (string table). TODO continue with xTimerCreate via the notify/timer
   xQueueGenericSend path.
+
+## Round 39 — idle/timer-service task string发现了; 创建路径 near
+
+- IDLE string lands at 0x0101ba50 with TCB-address-looking data BEFORE it
+  (0x2001e1a8 = pxCurrentTCB base - 4!) — so the IDLE task name isn't
+  referenced via pointer because the string is part of the TCB init
+  blob. Data just before: `ac e1 01 20` = 0x2001e1a8, `ec e4 01 20` =
+  0x2001e4ec — the KERNEL STATIC BLOCKS! This is const-init data writing
+  the scheduler's static kernel structs (pcIdleTaskTCB + pxIdleTask-
+  Stack etc.) — the idle task itself is const-initialized at
+  0x0101ba4x!
+- Tmr Svc + Tmr Q strings at 0x0101bf08 region — const TCB/queue init
+  data for the timer service task; also embedded. The timer task
+  creation pattern is CONST-DATA DIRECT, i.e., no xTimerCreate path is
+  executed (static allocation disused) → the timer service uses
+  xTimerCreate internally only when app creates timers dynamically.
+- TempTimer @0x0100b253 string is within the app's profile table; the
+  actual TempTimer creation must use a table-driven call:
+  pValue = table + offset pattern. It's referenced via profile
+  table with name offsets — need the app timer create function.
+Also found: refs tables of .c filenames → 0x01044030/0x01044050 etc =
+the per-channel reg tables listed in tools/irq_map analysis. Most rings
+already decoded.

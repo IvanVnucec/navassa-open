@@ -913,3 +913,21 @@ After copying banks, the IRQ cal routine:
 it's the radio-control step following profile setup, splitting into
 per-core channel resets (0x46000xxx = channel control regs confirmed
 again by direct store).
+
+## Round 37 — channel radio-config spawners
+
+- 0x1019830 = dispatcher: mode-select then either:
+   * r2==0: r4=1, r3=0 -> 0x10195ee (TX-style config path)
+   * r2==1 or 2: r4=0/1 and r3=1 -> 0x101975a (RX-style config path)
+- 0x101975a = RX-mode config spawner: table 0x01044030 selects per-channel
+  base; constant reg offsets per case: channels 0/1 -> r6=0x41/r7=0x3d
+  (RX), channels 2/3 -> r6=0x46/r7=0x42 (this map identifies 0x46001600 as
+  a shared per-channel config register — 4 channels at stride!). Calls
+  small helpers 0x101981e / 816 / 808 / 80e (each is the 1/2/8/4 field
+  sets used per config stage)
+- 0x10195ee = TX-mode config spawner with the same table (0x103aee8 base
+  offset list, channel bases 0x46001600)  — r6/s6 = RX-mode-dependent
+  strides 4/8 vs 2/4
+- Both spawn paths live in the radio-config state machine family (huge =
+  0x1019xxx-0x101axxx region is the low-level radio config writer —
+  the same "byte-write" style as 0x1002db4 pin_update)

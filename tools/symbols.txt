@@ -126,3 +126,10 @@
 102da94 dma_channel_cleanup
 102d84c dma_prep_step1
 102d88e dma_prep_step2
+100f6e0 spi_notify_thunk
+1023f9c stream_flag_set_0x40
+1014cbc spi_wait_flag
+102a860 dwt_sync_helper
+# stream obj wait-extension: flag word @+0xb8 (bits: 1/0x21/0x40 setpoints)
+# event obj: [+0] cb ptr; [+4] channel; [+0x10] byte; [+0x24] mode; [+0x26] en;
+#   wait obj: [+0x60] mask, [+0x64] priority

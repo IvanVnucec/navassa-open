@@ -830,3 +830,21 @@ Remaining unknowns / next:
 3. RAM payload .text campaign (blocked by unicorn 2.1.4 fault but
    approachable statically once the fork of payload handlers start
    naming at scale)
+
+## Round 33 — SPI engine helpers + wait/notify layer cross-linked
+
+- 0x100f6e0 = spi_notify_thunk (tail 0x10254a0 — one of the "wait"
+  functions, 10 callers)
+- 0x1023f9c = stream_flag_set_0x40: BASEPRI 0x30, {}. loc +0xb8 |= 0x40,
+  then invoke callback ([obj+0]); used once by dwt_timed_spi_op — so the
+  SPI completion INT signals stream via this flag mechanism
+- 0x1014cbc = spi_wait_flag (arg0 byte channel, arg1 param): calls the
+  renamed 0x102afd6 ("adi_wait_recv_B"/xQueue-like wait engine) with
+  param structures — SPI op waits for the flag to complete, then
+  dispatches further steps
+- 0x102a860 = tiny helpers (nmi signal pending / deassert glue)
+- full wait/notify ring: wait obj [+0x60]=mask, [+0x64]=prio byte —
+  these wrap 0x102b2b0 (lock step) and 0x102b05a (wake list work)
+The SPI module uses a GENERIC kernel-like wait flag layer (already
+decoded as ADI custom wait layer earlier); both SPI IRQ completion paths
+dispatch through it.

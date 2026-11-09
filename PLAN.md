@@ -873,3 +873,21 @@ This is the per-band tracking/utilization calibration data copy path
 during start-up. tracking_cals.c / cal_task_core.c territory confirmed.
 Next: continue decode (0x1034908/0x10348fc/0x1034c80 bodies), the
 run-state machine's decision tree, then cal completion callbacks.
+
+## Round 35 — calibration engine copy helpers: linked-list scatter
+
+- 0x1034908/0x10348fc = scatter-entry copier: [src] -> [dst+4], [src+4] ->
+  [dst], then LINKS dst onto a 0x38/0x40-strided chain with an 8-byte
+  memcpy tail loop — this is a linked-list scatter (pre-alloc nodes
+  threading the calibration parameter bank records!) conv via helper
+- 0x1034c80/78 = small wrappers (dst offsets 0x24/0x34 into state)
+- [r7+0x24..] name reveals chain into 0x2001fc14+0x24 and +0x34 — per-run
+  aggregated calibration lists
+- r1=r4/sb = chain heads. So the calibration engine copies profile table
+  content into linked lists — probably later walked by SPI-ops
+  when writing radio config register banks
+In other words: at boot, driver context gets a LINKED LIST of calibration
+records per band/channel (kept beyond the ctx struct that first appears
+during init) for use later by the calibration procedures. This is a
+significant discovery: the ctx struct has a sublist-per-bank container,
+which is the structure used by cal_task_core.

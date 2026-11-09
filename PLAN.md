@@ -891,3 +891,25 @@ records per band/channel (kept beyond the ctx struct that first appears
 during init) for use later by the calibration procedures. This is a
 significant discovery: the ctx struct has a sublist-per-bank container,
 which is the structure used by cal_task_core.
+
+## Round 36 — calibration IRQ body: engine control sequence
+
+After copying banks, the IRQ cal routine:
+1. calls 0x101a310 (aux ctrl?) -> sb (mask)
+2. loops bits of sl/sb: for bit i:
+   - reads stream obj table [0x2001ccf8 + i*4]
+   - [obj+4] = 0xFFFFFFFF (marker), [obj+0x10] = state (2 -> fail flag fp=0)
+   - calls the STREAM DISPATCHER 0x1031e9e with a ZEROED stack block + a
+     mode arg from [obj+8] — so this IRQ RUNS THE EVENT DISPATCH
+     DIRECTLY for calibration paths!
+   - then 0x1019830(idx, 2 or 5, cal_phase) — another dispatcher/spawner
+3. Then handles flag bytes in 0x2001fc14 ([+0],[+1],[+2]): on each set, it
+   copies the byte value into one of the PER-CHANNEL single byte register
+   addresses: 0x460011ad / 0x460015ad (control byte stores), then runs
+   0x1034c88 (a 16-step iterating delay?) and does pin_update with value
+   [r5+4] masked to 4 bits on 0x46000199/0x4600019a (channel enums!)
+4. Similar per-core repeats for byte 2 -> 0x4600015b / 0x46000634
+=> the cal engine writes hardware configuration DIRECTLY (no mailbox) —
+it's the radio-control step following profile setup, splitting into
+per-core channel resets (0x46000xxx = channel control regs confirmed
+again by direct store).

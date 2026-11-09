@@ -758,3 +758,35 @@ automatically into host-comms.
 - The 0x01044050/68/78 register-base tables serve BOTH the event action
   executor and DMA prep — they are the per-channel peripheral base
   table (one row per channel; dwords point into the 0x46000000 region).
+
+## Session progress checkpoint (after 12 pushes)
+
+Named-symbol census: ~90 symbols in tools/symbols.txt now, covering:
+- FreeRTOS kernel (V10.2.1): port handlers, scheduler core, queues-free
+  notify-wait layer, heap_4, list ops — data blocks + config constants
+  pinned
+- Boot/init layer: ALL trace-verified in C (16/16)
+- Host comms: mailbox_xfer + mailbox_notify_flush (the only 2 ring
+  writers) — host protocol fully characterized
+- scheduler.c: channel machines, dependency DAG resolver, state setter,
+  PendSV coupling — plus lock table (0x200025b0) and per-channel state
+  array (0x2001aac8) located
+- event framework: stream IRQs (IRQ180/181) -> dispatcher ->
+  event_action_executor -> pin_update glue -> registers
+- spimaster.c: TX/RX IRQ handlers, DWT-timed path, 0x58000040 control,
+  engine state at 0x2001fa58
+- dma.c: multi-channel config/cleanup over shared per-channel register
+  tables
+- 256-slot IRQ map: tools/irq_map.txt (core + 100+ app vectors)
+
+Open (not blocking continuation):
+- unicorn 2.1.4 fault at 0x0100298c (valid BNE) still caps full
+  app-run; offline LZ77 decode sidesteps it (both data blobs extracted)
+- patch-table applier logic (blob1, 102 records) — consumed via
+  sched_channel_op_22 path (exact loop still to decode)
+Remaining unknowns (lower confidence):
+- calibration/task modules (tracking_cals.c etc.) — partial
+- monitor/MCS modules — untouched
+- RAM payload .text — will require the same call-graph campaign once
+  the runtime is unblocked (or by static campaign with tools/func_map.py
+  on the reconstructed image)

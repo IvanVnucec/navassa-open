@@ -790,3 +790,17 @@ Remaining unknowns (lower confidence):
 - RAM payload .text — will require the same call-graph campaign once
   the runtime is unblocked (or by static campaign with tools/func_map.py
   on the reconstructed image)
+
+## Round 32 — literal-of-0x20020000 resolved (artifact)
+
+The "second literal" at 0x1023302 is an ADDRESS-MISALIGNMENT ARTIFACT:
+byte dump shows the 2-byte offset word 0x3302-0x1023304 = the real
+location; our scanner found it by mistakenly including the second
+halfword (0x1023302 = mid-word read of 0x2001df10 8-byte record).
+TRUE references to 0x20020000: only ONE — the descriptor at 0x010444dc
+itself (dest field, self-reference). The patch-table applier therefore
+cannot be found by literal-scan: it reaches the table via the DESCRIPTOR
+or a leaf function known by convention. Next attempt: trace the function
+called after post-decompress memcpy: check `monitor_drv.c`/`mcs.c` region
+for the pattern 'for each 16B record: masked RMW at [ptr+ ofs] with
+field_bits/field_mask' OR simply note the pattern as TODO.

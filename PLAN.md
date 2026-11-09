@@ -998,3 +998,14 @@ Decoded / confirmed blobs:
   "tag"-like fifth record (0x02fefc04 / 0xff01 / 0x52...) looks like
   invalid artifact (wrong stride in my scan) — the record at 0x01044518
   actually begins the compressed stream.
+
+## Round 42 — 2 more segments decoded (linked-list tables for the RAM payload)
+
+seg2 (src=0x01046336, len=42 compressed) → dst=0x200373e0, size 32 bytes:
+  {0x00000000, 0x20037400, 0x2003747a, 0x20037680, 0x20037c80...}
+  = a LINKED-LIST / pointer array inside the RAM payload (0x2003xxxx — the
+  application data structures in the payload!)
+seg3: index error → format slightly different (literal-only run may end
+  early). To investigate further later.
+These 0x20037xxx addresses are within the RAM payload region — the payload
+has its own config/linked-list data decompressed to those exact pointers.

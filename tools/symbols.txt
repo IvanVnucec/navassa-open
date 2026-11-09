@@ -122,3 +122,7 @@
 # 0x2000d9b0 / 0x2001fbdc = spi engine ctx blocks
 100ad34 mailbox_notify_flush
 # 0x4700200c = another SEMA4/MU-side reg (bit1 RMW, critical)
+102d908 dma_multi_channel_cfg
+102da94 dma_channel_cleanup
+102d84c dma_prep_step1
+102d88e dma_prep_step2

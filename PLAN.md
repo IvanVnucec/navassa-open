@@ -747,3 +747,14 @@ Both mailbox_xfer (cmd 0x22/0x23/0x25 per channel) and
 mailbox_notify_flush write into the SAME ring at 0x2002516c-control —
 so the whole app coordinate/channel/tab/scheduler machinery back-ends
 automatically into host-comms.
+
+## Round 31 — dma.c module surfaces
+
+- 0x102d908 = dma_multi_channel_cfg(mask arg): per-bit (r4) iteration;
+  calls prep helpers 0x102d84c/0x102d88e; per-channel table base from
+  0x01044068 region (the same table family as event executor!).
+- 0x102da94 = dma_channel_cleanup (via 0x102db38 impl): bit 0x20000000
+  clear pattern (DMA enable bits!) then count-down loop.
+- The 0x01044050/68/78 register-base tables serve BOTH the event action
+  executor and DMA prep — they are the per-channel peripheral base
+  table (one row per channel; dwords point into the 0x46000000 region).

@@ -979,3 +979,22 @@ string is the const-init blob stands: no more refs. So:
   pattern not yet reached, likely in scheduler.c/cal table-driven code
   (deferred to the RAM payload translation phase)
 - The whole 0x0101bxxx flash range = the kernel + scheduler bridge
+
+## Round 41 — descriptor table decoded.
+
+Layout at 0x010444d8..0x01044520: 5 16-byte descriptor records
+{tag, src_off, len, dst}. Segment indexed by src_off (with unknown base —
+candidates: table start 0x010444dc or table end 0x01044520). 2 known
+decode shapes match the spec:
+  - desc@0x010444dc: {0xfffbe493, 0x1ae2, 0x6d0, 0x20020000} (validated!)
+  - second-thought: 0xfffbe4xx is a "sha/compression-version" 4-byte tag,
+    then {src_off, len, dst}
+Decoded / confirmed blobs:
+  blob1 (identified earlier, dest 0x20020000)
+  blob2 (dest 0x200027f8, 44368 B, validated!)
+  TWO MORE small segments newly identified (seg2 len=0x2a -> dst
+  0x200373e0, seg3 len=0x28 -> dst 0x200387e0). Positive that these are
+  the compressed LUT blobs.
+  "tag"-like fifth record (0x02fefc04 / 0xff01 / 0x52...) looks like
+  invalid artifact (wrong stride in my scan) — the record at 0x01044518
+  actually begins the compressed stream.

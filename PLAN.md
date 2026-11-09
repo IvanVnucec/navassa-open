@@ -639,3 +639,21 @@ refs: 0x1023302 = inside sched_channel_op_22! and 0x10444e4 = descriptor).
   +0x60 mask, +0x64 prio byte, +0x1c state
 This is a wait-dependency/DAG resolver for the ADI scheduler (scheduler.c
 resource-dependency handling).
+
+## Round 25 — scheduler state transitions + who drives the machine
+
+- 0x102b572 = channel state setter: [ch+0x1c]=new_state, then (unchanged?
+  no — always) mailbox_xfer(cmd=[ch+0x6d], ...) — the 0x22/0x23/0x25 cmds
+are per-channel (stored per channel at +0x6d!), so ONE function handles all
+channel commands via the byte at +0x6d. Previous "op handler" framenaming
+refined: the handlers differ by leading state checks, but all send the
+channel's own cmd.
+- 0x10232c6 = wrapper: calls 0x101b88c (the task-notify-state machine!
+arg0=[ch?], r2=1 = 'set BITS'? recall A[0x50]=ucNotifyState=2 write) and
+on nonzero result pends PendSV (ICSR=0x10000000 — REAL PENDSVSET!).
+Confirms 0x101b88c notifications: the scheduler waits on task
+notifications per channel.
+- xref yields the top-level driver: 0x1028a2a/0x1028a98 (both call the
+crit pair + SS helpers + state setter) — remaining: who calls
+0x1023710/0x10232f6 (0 callers each — they must be reached indirectly:
+0x1028a2a/98 likely dispatch). Next: decode 0x1028a2a/0x1028a98.

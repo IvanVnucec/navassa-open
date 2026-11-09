@@ -99,3 +99,6 @@
 1036d24 crit_lock_check_A
 1036d82 crit_lock_check_B
 # 0x200025b0 = lock/config master block (64B stride, 17 entries, bitfields)
+10232c6 sched_set_state_then_pend
+102b572 sched_channel_set_state
+102b414 sched_state_op_user

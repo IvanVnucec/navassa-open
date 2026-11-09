@@ -1065,3 +1065,27 @@ RAM payload code translation (next big campaign)
   correct/annotate → verify with tracecmp.sh; naming campaign continues by
   editing tools/symbols.txt and re-running analyzeHeadless headless with
   the script (symbol reimport is idempotent)
+
+## Round 44 — unicorn-fault SOLVED (real, reproducible bug) + app runs further
+
+Root cause of the emulator stop at 0x0100298c (fully reproduced and
+isolated in 2025-07):
+-IRECTION not firmware, not maps: **UC_HOOK_MEM_READ(_AFTER) covering the
+FLASH region while executing code from the SAME flash region** —
+unicorn 2.1.4/QEMU M-profile bug: a data read hook registered over a
+region where code also executes causes a spurious UC_ERR_INSN_INVALID on
+a valid BNE after ~700 writes. Repro: 10-line python; refined narrowing
+(memory-range-restricted hooks) confirms flash-only hooks trigger it;
+RAM-only and MMIO-only read hooks do NOT. tools/unicorn_repro.py records
+this for future reference.
+
+Workaround: emulator read hooks registered per-range (RAM / MMIO / SCB),
+skipping flash; the write hook stays unbounded for the code-region write
+log. Result: the LZ77 decompression+app init now runs 127,218 events
+(3.8x more than before) — the entire app initialization is unblocked in
+real-time emulation.
+
+PARTIAL VALIDATION of the offline decompressor against runtime: first
+~0x169 bytes of blob2 exact-match the offline decode; spinner ran out at
+the 0xFF-extended literal run — that's OUR offline decoder semantics
+(nibble/frame interpretation) to refine — good cross-validation target!

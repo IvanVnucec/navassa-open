@@ -338,7 +338,17 @@ static uc_engine *setup_uc(const uint8_t *code, long fsize, uint64_t firmware_ba
 	uc_hook_add(uc, &hh_insn, UC_HOOK_INSN_INVALID, hook_insn_invalid, NULL, 1, 0);
 	uc_hook_add(uc, &hh_invalid, UC_HOOK_MEM_UNMAPPED | UC_HOOK_MEM_PROT,
 		    hook_mem_invalid, NULL, 1, 0);
-	uc_hook_add(uc, &hh_read, UC_HOOK_MEM_READ_AFTER, hook_mem_read, NULL, 1, 0);
+	/* Read hooks must NOT cover the flash region: unicorn 2.1.4 bug —
+	 * UC_HOOK_MEM_READ(_AFTER) overlapping the mapped-from-code flash
+	 * window triggers a spurious UC_ERR_INSN_INVALID on a valid BNE in
+	 * the LZ77 decompressor (diagnosed 2025-07, tools/unicorn_repro.py).
+	 * Register read hooks per-range, skipping 0x01000000..0x01100000. */
+	uc_hook_add(uc, &hh_read, UC_HOOK_MEM_READ_AFTER, hook_mem_read, NULL,
+		    0x20000000, 0x20200000);			/* RAM */
+	uc_hook_add(uc, &hh_read, UC_HOOK_MEM_READ_AFTER, hook_mem_read, NULL,
+		    0x40000000, 0x60000000);			/* MMIO */
+	uc_hook_add(uc, &hh_read, UC_HOOK_MEM_READ_AFTER, hook_mem_read, NULL,
+		    0xe0000000, 0xe0100000);			/* SCB */
 	uc_hook_add(uc, &hh_write, UC_HOOK_MEM_WRITE, hook_mem_write, NULL, 1, 0);
 	if (trace_enabled)
 		uc_hook_add(uc, &hh_code, UC_HOOK_CODE, hook_code, NULL, 1, 0);

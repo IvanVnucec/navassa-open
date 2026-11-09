@@ -108,3 +108,15 @@
 # stream obj: +0 = callback fn ptr (called!), +0xb0 = wait-extension area,
 # +0xb0+0x18 = flag word (bit0/bit5 set by tail)
 1023fca dependency_search
+102a564 dwt_timed_spi_op
+102a86c spi_stream_irq_tx
+102abe4 spi_stream_irq_rx
+100a3a0 spi_thunk_common
+100a3c8 spi_thunk_0
+100a3cc spi_thunk_1
+100a3d0 spi_thunk_2
+100a3d4 spi_thunk_3
+100a3d8 spi_thunk0_B
+# 0x58000040 = streaming engine control reg (0x800=TX start, 0x2000/0x1000=RX ack steps)
+# 0x2001fa58 = stream-engine state (busy @0x1b, state @0x16/[0])
+# 0x2000d9b0 / 0x2001fbdc = spi engine ctx blocks

@@ -714,3 +714,19 @@ crit pair + SS helpers + state setter) — remaining: who calls
 - blob1 records: 102 patch records. The trailing 0x2000d43x/0x2000d44x
   pointers land INSIDE blob2's data (0x200027f8+0x5xxx/0x5c40) — segments
   reference each other. Tail value 0x00000014 = ? (to check).
+
+## Round 29 — SPI streaming engine mapped
+
+- IRQ63  0x102a86c = spi_stream_irq_tx
+- IRQ62  0x102abe4 = spi_stream_irq_rx
+- IRQ51  0x102a564 = dwt_timed_spi_op (third DWT user — the "SPI in
+  timed section" pattern: DEMCR TRACENA + DWT CYCCNTENA + engine regs)
+- IRQ216-223 = spi_thunk_N jump table entries (r0=0..3 selects variant
+  via 0x100a3a0/0x100a3b2 common)
+- streaming engine control reg = 0x58000040 (writes 0x800 = TX kick,
+  0x2000+0x1000 = RX ack pair), app uses 0x5800xxxx regs (previously
+  unseen region)
+- engine state block 0x2001fa58 (+0x16 state, +0x1b busy); secondary ctx
+  0x2000d9b0, 0x2001fbdc
+- spimaster.c module = the SPI path to the radio frontends; interacts
+  via the stream-obj flag/callback machinery decoded in round 27
